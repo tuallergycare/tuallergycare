@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "363320504042",
+    "project_id": "tuallergycare",
+    "storage_bucket": "tuallergycare.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:363320504042:android:447e100badb3babb013193",
+        "android_client_info": {
+          "package_name": "com.example.tuallergycare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "363320504042-romu74s20s5d7ndj8f2kbs0olpberuus.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqj6HbyxbchS5YBWt1wFaKxyz3Pup0_bY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "363320504042-romu74s20s5d7ndj8f2kbs0olpberuus.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "363320504042-69bu1esii795bek19937sqboqubcrhh7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.tuallergycare"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
