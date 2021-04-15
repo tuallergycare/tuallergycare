@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:tuallergycare/screens/assess_screen.dart';
+import 'package:tuallergycare/widgets/button_home.dart';
 import 'package:tuallergycare/widgets/stateBoard.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -8,6 +11,7 @@ class HomeScreen extends StatelessWidget {
     String day;
     String month;
     String year;
+    double screen = MediaQuery.of(context).size.width;
 
     switch (today.weekday) {
       case 1:
@@ -92,6 +96,43 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ),
+        Container(
+          margin: EdgeInsets.only(top: 30),
+          child: ButtonHome(
+            message: "ยากินวันนี้",
+            height: screen*0.25,
+            width: screen*0.95,
+            color: Colors.blue,
+            icon: Icons.book,
+            iconSize: 60.0,
+            //radius: 46.0,
+            onClick: () {
+             
+            },
+          ),
+        ),
+
+        Container(
+          margin: EdgeInsets.only(top: 30),
+          child: ButtonHome(
+            message: "ประเมินอาการ",
+            height: screen*0.25,
+            width: screen*0.95,
+            color: Colors.pink,
+            icon: Icons.text_snippet_rounded,
+            iconSize: 60.0,
+            //radius: 46.0,
+            onClick: () {
+              Navigator.of(context).pushNamed(AssessScreen.routeName);
+            },
+          ),
+        ),
+        
+        TextButton(
+            onPressed: () async{
+              await FirebaseAuth.instance.signOut();
+            },
+            child: Text('ออกจากระบบ'))
       ],
     );
   }
