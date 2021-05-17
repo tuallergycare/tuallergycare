@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tuallergycare/screens/register_screen.dart';
+import 'package:tuallergycare/screens/select_user_screen.dart';
 import 'package:tuallergycare/screens/tabs_screen.dart';
 import 'package:tuallergycare/utility/style.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -175,7 +176,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                   TextButton(
                       onPressed: () => Navigator.of(context).pushNamed(
-                            RegisterScreen.routeName,
+                            SelectUserScreen.routeName,
                           ),
                       child: Text(
                         'สร้างบัญชีใหม่',

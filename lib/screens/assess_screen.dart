@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tuallergycare/models/nosal.dart';
 import 'package:tuallergycare/models/ocular.dart';
+import 'package:tuallergycare/screens/tabs_screen.dart';
 import 'package:tuallergycare/widgets/assess_warning.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -83,11 +84,79 @@ class _AssessScreenState extends State<AssessScreen> {
 
   bool _isCocludeExpanded = false;
 
+  void editAssessment() async {
+    final currentPateint = FirebaseAuth.instance.currentUser;
+    Map<String, int> _assestment = {};
+
+    // print(_isNasalFinished);
+    // print(_isOcularFinished);
+    // print(_isConcludeFinished);
+    if (_isOcularFinished && _isNasalFinished && _isConcludeFinished) {
+      // print(_ocular.getOcularLevel);
+      // print(_nasal.getNasalLevel);
+      // print(_currentSliderValue);
+      _assestment.addAll(_nasal.getNasalLevel);
+      _assestment.addAll(_ocular.getOcularLevel);
+      _assestment.addAll({'vas_score': _currentSliderValue.toInt()});
+
+      var idRecentAssessment;
+      await FirebaseFirestore.instance
+          .collection('patients')
+          .doc(currentPateint.uid)
+          .collection('assessments')
+          .orderBy('created', descending: true)
+          .limit(1)
+          .get()
+          .then((QuerySnapshot querySnapshot) {
+        idRecentAssessment = querySnapshot.docs.first.id;
+      });
+
+      await FirebaseFirestore.instance
+          .collection('patients')
+          .doc(currentPateint.uid)
+          .collection('assessments')
+          .doc(idRecentAssessment)
+          .update({'assessment': _assestment});
+      //     .add({
+      //   'assessment': _assestment,
+      //   'created': Timestamp.now(),
+      // });
+
+      // await FirebaseFirestore.instance
+      //     .collection('patients')
+      //     .doc(currentPateint.uid)
+      //     .collection('assessments')
+      //     .orderBy('created', descending: true)
+      //     .get()
+      //     .then((QuerySnapshot querySnapshot) {
+      //   querySnapshot.docs.forEach((doc) {
+      //     print(doc.data());
+      //   });
+      // });
+
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Container(
+              height: 25,
+              alignment: Alignment.center,
+              child: Text(
+                'กรุณากรอกแบบประเมินให้ครบ',
+                style: TextStyle(fontSize: 20),
+              )),
+          backgroundColor: Theme.of(context).errorColor,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    var sameDate = ModalRoute.of(context).settings.arguments as bool;
     return Scaffold(
       appBar: AppBar(
-        title: Text('แบบประเมินเมินเมินเมิน'),
+        title: Text('แบบประเมิน'),
         backgroundColor: Theme.of(context).primaryColor,
       ),
       body: Container(
@@ -281,7 +350,6 @@ class _AssessScreenState extends State<AssessScreen> {
                                       _isCocludeExpanded = true;
                                     });
                                   },
-                                
                                 )
                               ],
                             ),
@@ -308,88 +376,82 @@ class _AssessScreenState extends State<AssessScreen> {
               ElevatedButton(
                 child: Padding(
                     padding: EdgeInsets.all(15),
-                    child: Text(
-                      'บันทึก',
-                      style: TextStyle(
-                        fontSize: 25,
-                      ),
-                    )),
+                    child: sameDate
+                        ? Text(
+                            'แก้ไข',
+                            style: TextStyle(
+                              fontSize: 25,
+                            ),
+                          )
+                        : Text(
+                            'บันทึก',
+                            style: TextStyle(
+                              fontSize: 25,
+                            ),
+                          )),
                 style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all<Color>(
                         Theme.of(context).primaryColor)),
-                onPressed: () async {
-                  // FirebaseFirestore.instance.collection('assess').add({
-                  //   'nasal': 4
-                  // });
-                  final currentPateint = FirebaseAuth.instance.currentUser;
-                  Map<String, int> _assestment = {};
+                onPressed: sameDate
+                    ? () => editAssessment()
+                    : () async {
+                        // FirebaseFirestore.instance.collection('assess').add({
+                        //   'nasal': 4
+                        // });
+                        final currentPateint =
+                            FirebaseAuth.instance.currentUser;
+                        Map<String, int> _assestment = {};
 
-                  // print(_isNasalFinished);
-                  // print(_isOcularFinished);
-                  // print(_isConcludeFinished);
-                  if (_isOcularFinished &&
-                      _isNasalFinished &&
-                      _isConcludeFinished) {
-                    // print(_ocular.getOcularLevel);
-                    // print(_nasal.getNasalLevel);
-                    // print(_currentSliderValue);
-                    _assestment.addAll(_nasal.getNasalLevel);
-                    _assestment.addAll(_ocular.getOcularLevel);
-                    _assestment
-                        .addAll({'vas_score': _currentSliderValue.toInt()});
-                    await FirebaseFirestore.instance
-                        .collection('patients')
-                        .doc(currentPateint.uid)
-                        .collection('assessments')
-                        .add({
-                      'assessment': _assestment,
-                      'created': DateTime.now().toIso8601String(),
-                    });
+                        // print(_isNasalFinished);
+                        // print(_isOcularFinished);
+                        // print(_isConcludeFinished);
+                        if (_isOcularFinished &&
+                            _isNasalFinished &&
+                            _isConcludeFinished) {
+                          // print(_ocular.getOcularLevel);
+                          // print(_nasal.getNasalLevel);
+                          // print(_currentSliderValue);
+                          _assestment.addAll(_nasal.getNasalLevel);
+                          _assestment.addAll(_ocular.getOcularLevel);
+                          _assestment.addAll(
+                              {'vas_score': _currentSliderValue.toInt()});
+                          await FirebaseFirestore.instance
+                              .collection('patients')
+                              .doc(currentPateint.uid)
+                              .collection('assessments')
+                              .add({
+                            'assessment': _assestment,
+                            'created': Timestamp.now(),
+                          });
 
-                    await FirebaseFirestore.instance
-                        .collection('patients')
-                        .doc(currentPateint.uid)
-                        .collection('assessments')
-                        .orderBy('created', descending: true)
-                        .get()
-                        .then((QuerySnapshot querySnapshot) {
-                      querySnapshot.docs.forEach((doc) {
-                        // print(doc.data());
-                      });
-                    });
+                          // await FirebaseFirestore.instance
+                          //     .collection('patients')
+                          //     .doc(currentPateint.uid)
+                          //     .collection('assessments')
+                          //     .orderBy('created', descending: true)
+                          //     .get()
+                          //     .then((QuerySnapshot querySnapshot) {
+                          //   querySnapshot.docs.forEach((doc) {
+                          //     print(doc.data());
+                          //   });
+                          // });
 
-                    Navigator.pop(context);
-                  } else {
-                    // showDialog(
-                    //   context: context,
-                    //   builder: (ctx) => AlertDialog(
-                    //     title: Text('An error occurred!'),
-                    //     content: Text('Something went wrong.'),
-                    //     actions: <Widget>[
-                    //       TextButton(
-                    //         child: Text('Okay'),
-                    //         onPressed: () {
-                    //           Navigator.of(ctx).pop();
-                    //         },
-                    //       )
-                    //     ],
-                    //   ),
-                    // );
-                    //
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Container(
-                            height: 25,
-                            alignment: Alignment.center,
-                            child: Text(
-                              'กรุณากรอกแบบประเมินให้ครบ',
-                              style: TextStyle(fontSize: 20),
-                            )),
-                        backgroundColor: Theme.of(context).errorColor,
-                      ),
-                    );
-                  }
-                },
+                          Navigator.pop(context);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Container(
+                                  height: 25,
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'กรุณากรอกแบบประเมินให้ครบ',
+                                    style: TextStyle(fontSize: 20),
+                                  )),
+                              backgroundColor: Theme.of(context).errorColor,
+                            ),
+                          );
+                        }
+                      },
               )
             ],
           ),

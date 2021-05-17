@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:tuallergycare/screens/assess_screen.dart';
 import 'package:tuallergycare/screens/auth_screen.dart';
-import 'package:tuallergycare/screens/information_screen/medicine/medicine_screen.dart';
+import 'package:tuallergycare/screens/doctor/d_adddrug_screen.dart';
+import 'package:tuallergycare/screens/doctor/d_appointment.dart';
+import 'package:tuallergycare/screens/doctor/d_diagnose.dart';
+import 'package:tuallergycare/screens/doctor/d_drugoral.dart';
+import 'package:tuallergycare/screens/doctor/d_drugspay.dart';
+import 'package:tuallergycare/screens/doctor/d_editprofilescreen.dart';
+import 'package:tuallergycare/screens/doctor/d_form_screen.dart';
+import 'package:tuallergycare/screens/doctor/d_home_screen.dart';
+import 'package:tuallergycare/screens/doctor/d_patientprofile_screen.dart';
+import 'package:tuallergycare/screens/doctor/d_profile_screen.dart';
+import 'package:tuallergycare/screens/doctor/d_skintest.dart';
+import 'package:tuallergycare/screens/doctor/d_tabs_screen.dart';
+import 'package:tuallergycare/screens/edit_profile_screen.dart';
+import 'package:tuallergycare/screens/first_assess_screen.dart';
+import 'package:tuallergycare/screens/information_screen/medicine/medicine_info_screen.dart';
 import 'package:tuallergycare/screens/information_screen/stimulus/stimulus_screen.dart';
+import 'package:tuallergycare/screens/medicine_screen.dart';
+import 'package:tuallergycare/screens/proflie_screen.dart';
 import 'package:tuallergycare/screens/register_screen.dart';
+import 'package:tuallergycare/screens/select_user_screen.dart';
 import 'package:tuallergycare/screens/tabs_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -20,7 +37,89 @@ void main() async {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  var currentPatient = FirebaseAuth.instance.currentUser;
+
+  var isFirstLogin;
+  var checkIdPatient;
+  var checkIdDoctor;
+
+  void initState() {
+    super.initState();
+  }
+
+  Future<void> checkFirstLogin(User currentUser) async {
+    print('inCheck');
+    await FirebaseFirestore.instance
+        .collection('patients')
+        .doc(currentUser.uid)
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
+      print(documentSnapshot.id);
+      checkIdPatient = documentSnapshot.exists;
+      print('inPa: $checkIdPatient');
+    });
+
+    // await FirebaseFirestore.instance
+    //     .collection('patients')
+    //     .get().then((QuerySnapshot querySnapshot) {
+    //       querySnapshot.docs.forEach((doc) {
+    //         doc
+    //        });
+    //     });
+
+    await FirebaseFirestore.instance
+        .collection('doctors')
+        .doc(currentUser.uid)
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
+      print(documentSnapshot.id);
+      checkIdDoctor = documentSnapshot.exists;
+      print('inDoc $checkIdDoctor');
+    });
+    //     .then((QuerySnapshot querySnapshot) {
+    //   querySnapshot.docs.forEach((doc) {
+    //     doc.
+    //   });
+    // });
+    if (checkIdPatient == true && checkIdDoctor != true) {
+      await FirebaseFirestore.instance
+          .collection('patients')
+          .doc(currentUser.uid)
+          .get()
+          .then((DocumentSnapshot documentSnapshot) {
+        if (documentSnapshot['isFirstLogin'] == true) {
+          print('waitTrue');
+          isFirstLogin = true;
+          print('setTrue');
+        } else {
+          isFirstLogin = false;
+          print('setFalse');
+        }
+      });
+    }
+  }
+
+  void checkLogin() async {
+    await FirebaseAuth.instance.currentUser.reload();
+    print(currentPatient);
+  }
+
+  // Future<Widget> decidePage() async{
+  //   await checkFirstLogin();
+  //   print('2FirstLog: $isFirstLogin');
+  //   if(isFirstLogin == true){
+  //     return FirstAssessScreen();
+  //   }else{
+  //     return TabsScreen();
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -33,12 +132,81 @@ class MyApp extends StatelessWidget {
       home: StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (ctx, userSnapshot) {
+          // print('userIn: ${userSnapshot.hasData}');
+          // if (userSnapshot.connectionState == ConnectionState.waiting) {
+          //   return Center(
+          //     child: CircularProgressIndicator(),
+          //   );
+          // }
           try {
             if (userSnapshot.hasData) {
-              return TabsScreen();
+              currentPatient = FirebaseAuth.instance.currentUser;
+              print('Shapshot: ${userSnapshot.connectionState}');
+              print('CurrentUser: ${currentPatient.metadata}');
+              // checkLogin();
+              // checkFirstLogin(currentPatient);
+
+              // print('1isFirestlog: $isFirstLogin');
+              // if (isFirstLogin == true) {
+              //   return FirstAssessScreen();
+              // }
+              // return TabsScreen();
+
+              // if (currentPatient != null) {
+              //   checkFirstLogin();
+              //   print('1isFirestlog: $isFirstLogin');
+              //   if (isFirstLogin == true) {
+              //     return FirstAssessScreen();
+              //   }
+              //   return TabsScreen();
+              // }
+              return FutureBuilder(
+                  future: checkFirstLogin(currentPatient),
+                  builder: (context, futureSnapshot) {
+                    print(futureSnapshot.connectionState);
+                    print('checkIdPaIn: $checkIdPatient');
+                    print('checkIdDocIn: $checkIdDoctor');
+                    if (futureSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return Scaffold(
+                        body: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+                    if (checkIdPatient) {
+                      if (isFirstLogin == true) {
+                        // print('isfffffffffff: $isFirstLogin');
+                        isFirstLogin = false;
+                        return FirstAssessScreen();
+                      }
+                      // print('isfffffffffff: $isFirstLogin');
+                      return TabsScreen();
+                    } else if (checkIdDoctor) {
+                      return TabsDoctorScreen();
+                    }
+                  });
+              // checkFirstLogin().then((value) {
+              //   print('isFirestlog: $isFirstLogin');
+              //   if (isFirstLogin == true) {
+              //     print('innnnnnnnnnnnnn');
+              //     return FirstAssessScreen();
+              //   }else{
+              //     print('gggggggggggg');
+              // return TabsScreen();
+              //   }
+              // });
+              // checkFirstLogin();
+              // print('1isFirestlog: $isFirstLogin');
+              // if (isFirstLogin == true) {
+              //   return FirstAssessScreen();
+              // }
+              // return TabsScreen();
             }
+            print('comebackToLog');
             return AuthScreen();
           } catch (err, stacktrace) {
+            print('error');
             print(stacktrace);
             return Container(
               child: Text('err'),
@@ -49,12 +217,29 @@ class MyApp extends StatelessWidget {
       routes: {
         // '/': (ctx) => AuthScreen(),
         // '/': (ctx) => AssessScreen(),
-        // AuthScreen.routeName: (ctx) => AuthScreen(),
-        // TabsScreen.routeName: (ctx) => TabsScreen(),
-        RegisterScreen.routeName: (ctx) => RegisterScreen(),
         MedicineScreen.routeName: (ctx) => MedicineScreen(),
+        AuthScreen.routeName: (ctx) => AuthScreen(),
+        TabsScreen.routeName: (ctx) => TabsScreen(),
+        FirstAssessScreen.routeName: (ctx) => FirstAssessScreen(),
+        RegisterScreen.routeName: (ctx) => RegisterScreen(),
+        MedicineInfoScreen.routeName: (ctx) => MedicineInfoScreen(),
         StimulusScreen.routeName: (ctx) => StimulusScreen(),
         AssessScreen.routeName: (ctx) => AssessScreen(),
+        ProfileScreen.routeName: (ctx) => ProfileScreen(),
+        EditProfileScreen.routeName: (ctx) => EditProfileScreen(),
+        SelectUserScreen.routeName: (ctx) => SelectUserScreen(),
+        DoctorFormScreen.routeName: (ctx) => DoctorFormScreen(),
+        TabsDoctorScreen.routeName: (ctx) => TabsDoctorScreen(),
+        DoctorHomeScreen.routeName: (ctx) => DoctorHomeScreen(),
+        DoctorProfileScreen.routeName: (ctx) => DoctorProfileScreen(),
+        DoctorEditProfileScreen.routeName: (ctx) => DoctorEditProfileScreen(),
+        PatientProfileScreen.routeName: (ctx) => PatientProfileScreen(),
+        AddDrugScreen.routeName: (ctx) => AddDrugScreen(),
+        AddSkinTestScreen.routeName: (ctx) => AddSkinTestScreen(),
+        DrugOral.routeName: (ctx) => DrugOral(),
+        DrugSpay.routeName: (ctx) => DrugSpay(),
+        Diagnose.routeName: (ctx) => Diagnose(),
+        Appointment.routeName: (ctx) => Appointment(),
       },
     );
   }

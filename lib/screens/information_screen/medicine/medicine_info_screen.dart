@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class MedicineScreen extends StatelessWidget {
+class MedicineInfoScreen extends StatelessWidget {
   static const routeName = '/medicine-info';
   @override
   Widget build(BuildContext context) {

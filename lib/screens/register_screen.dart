@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tuallergycare/screens/first_assess_screen.dart';
 import 'package:tuallergycare/utility/style.dart';
 import 'package:tuallergycare/widgets/picker_time.dart';
 import 'package:tuallergycare/widgets/radio_button.dart';
@@ -176,12 +177,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               'gender': _gender,
                               'phone_number': _phoneNumber,
                               'status': null,
+                              'isFirstLogin': true,
+                              'height': null,
+                              'weight': null,
+                              'disease':null,
+                              'medicine': null,
+                              'skintest': null,
+                              'research': null,
+                              'appointment': null,
                             });
                       } catch (err) {
                         print(err);
                       }
 
-                      Navigator.of(context).pop();
+                      Navigator.pushNamed(context, FirstAssessScreen.routeName);
                     },
                     child: Text(
                       'ลงทะเบียน',

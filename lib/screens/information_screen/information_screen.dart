@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:tuallergycare/screens/information_screen/medicine/medicine_screen.dart';
+import 'package:tuallergycare/screens/information_screen/medicine/medicine_info_screen.dart';
 import 'package:tuallergycare/screens/information_screen/stimulus/stimulus_screen.dart';
 
 class InformationScreen extends StatelessWidget {
   void selectMedicine(BuildContext context) {
     Navigator.of(context).pushNamed(
-      MedicineScreen.routeName,
+      MedicineInfoScreen.routeName,
     );
   }
 

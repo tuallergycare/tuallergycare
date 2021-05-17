@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tuallergycare/screens/home_screen.dart';
 import 'package:tuallergycare/screens/information_screen/information_screen.dart';
+import 'package:tuallergycare/screens/proflie_screen.dart';
 
 class TabsScreen extends StatefulWidget {
   static const routeName = '/tabs';
@@ -11,7 +12,10 @@ class TabsScreen extends StatefulWidget {
 class _TabsScreenState extends State<TabsScreen> {
   List<Map<String, Object>> _pages = [
     {'page': HomeScreen(), 'title': 'home'},
+    // {'page': ProfileScreen(), 'title': 'home'},
     {'page': InformationScreen(), 'title': 'information'},
+    {'page': HomeScreen(), 'title': 'graph'},
+    {'page': ProfileScreen(), 'title': 'profile'},
   ];
 
   int _selectedPageIndex = 0;

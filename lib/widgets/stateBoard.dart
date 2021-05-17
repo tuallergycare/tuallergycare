@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +40,7 @@ class _StateBoardState extends State<StateBoard> {
   var hasStatus = false;
   var hasCongrestionNasal = false;
   var hasNewAssessment = false;
-  var hasAssessments = false;
+  var editStatus = false;
   int initNumAssessment = 0;
   int numOfAssessments = 0;
   double avgVasScore = 0;
@@ -46,8 +49,8 @@ class _StateBoardState extends State<StateBoard> {
 
   @override
   void initState() {
-    super.initState();
     checkStatusAndAssessment();
+    super.initState();
   }
 
   Future<void> checkStatusAndAssessment() async {
@@ -66,16 +69,16 @@ class _StateBoardState extends State<StateBoard> {
         .doc(currentPatient.uid)
         .get()
         .then((DocumentSnapshot snapshot) {
-      hasAssessments = snapshot.data().containsKey('assessments');
-      print(snapshot.data());
       if (snapshot['status'] == null) {
         initStatusPatient = null;
         presentStatusPatient = null;
         hasStatus = false;
+        // print('hs');
       } else {
         initStatusPatient = snapshot['status'].toString();
         presentStatusPatient = initStatusPatient;
         hasStatus = true;
+        // print('dh');
       }
       // print(initStatusPatient);
     });
@@ -87,24 +90,26 @@ class _StateBoardState extends State<StateBoard> {
         .get()
         .then((QuerySnapshot querySnapshot) {
       initNumAssessment = querySnapshot.size;
-      print(initNumAssessment);
+      // print('farInit: $initNumAssessment');
     });
   }
 
   Future<void> analyzeAssessments() async {
-      await FirebaseFirestore.instance
-          .collection('patients')
-          .doc(currentPatient.uid)
-          .collection('assessments')
-          .get()
-          .then((QuerySnapshot querySnapshot) {
-        numOfAssessments = querySnapshot.size;
-      });
-      print('init: $initNumAssessment');
-      print('numOf: $numOfAssessments');
+    await FirebaseFirestore.instance
+        .collection('patients')
+        .doc(currentPatient.uid)
+        .collection('assessments')
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      numOfAssessments = querySnapshot.size;
+    });
+    // print('init: $initNumAssessment');
+    // print('numOf: $numOfAssessments');
     if (numOfAssessments != null &&
         numOfAssessments >= 3 &&
-        initNumAssessment != numOfAssessments) {
+        initNumAssessment != numOfAssessments && initNumAssessment != 0) {
+          // print('initIN: $initNumAssessment');
+          // print('numOfIN: $numOfAssessments');
       initNumAssessment = numOfAssessments;
       await FirebaseFirestore.instance
           .collection('patients')
@@ -114,17 +119,18 @@ class _StateBoardState extends State<StateBoard> {
           .limit(3)
           .get()
           .then((QuerySnapshot querySnapshot) {
-            // print('nosalC: ${querySnapshot.docs.last.data()['assessment']['congrestion_nasal']}');
-            print('status: $presentStatusPatient');
-            print('nosalC: ${querySnapshot.docs.first['assessment']['congrestion_nasal']}');
+        // print('nosalC: ${querySnapshot.docs.last.data()['assessment']['congrestion_nasal']}');
+        // print('status: $presentStatusPatient');
+        print(
+            'nosalC: ${querySnapshot.docs.first['assessment']['congrestion_nasal']}');
         if (querySnapshot.docs.first.data()['assessment']['congrestion_nasal'] >
             0) {
-              // print('nosalC: ${querySnapshot.docs.last.data()['assessment']['congrestion_nasal']}');
+          // print('nosalC: ${querySnapshot.docs.last.data()['assessment']['congrestion_nasal']}');
           hasCongrestionNasal = true;
-          print('hasC: $hasCongrestionNasal');
+          // print('hasC: $hasCongrestionNasal');
         } else {
           hasCongrestionNasal = false;
-          print('hasC: $hasCongrestionNasal');
+          // print('hasC: $hasCongrestionNasal');
         }
 
         if (lastVasScores.isNotEmpty) {
@@ -138,8 +144,8 @@ class _StateBoardState extends State<StateBoard> {
         });
         avgVasScore =
             (lastVasScores[0] + lastVasScores[1] + lastVasScores[2]) / 3;
-        print(lastVasScores);
-        print(avgVasScore);
+        // print(lastVasScores);
+        // print(avgVasScore);
 
         defindStatus(hasCongrestionNasal, avgVasScore);
       });
@@ -184,9 +190,11 @@ class _StateBoardState extends State<StateBoard> {
           break;
       }
     }
+    print('defindState: $presentStatusPatient');
   }
 
   String selectedImage(String presentStatusPatient) {
+    print('stateImg: $presentStatusPatient');
     switch (presentStatusPatient) {
       case 'T0':
         return 'assets/images/smile.png';
@@ -225,16 +233,23 @@ class _StateBoardState extends State<StateBoard> {
         break;
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Object>(
-        stream: FirebaseFirestore.instance
-            .collection('patients')
-            .doc(currentPatient.uid)
-            .collection('assessments')
-            .snapshots(),
-        builder: (ctx, snapshot) {
+        stream: StreamGroup.merge(
+            [FirebaseFirestore.instance
+                .collection('patients')
+                .doc(currentPatient.uid)
+                .collection('assessments')
+                .snapshots(),
+            FirebaseFirestore.instance
+              .collection('patients').doc(currentPatient.uid).snapshots(includeMetadataChanges: true)]),
+        // stream:FirebaseFirestore.instance
+        //         .collection('patients')
+        //         .doc(currentPatient.uid)
+        //         .collection('assessments')
+        //         .snapshots(),
+        builder: (context, snapshot) {
           return FutureBuilder(
               future: analyzeAssessments(),
               builder: (context, futureSnapshot) {
