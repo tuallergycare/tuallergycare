@@ -200,6 +200,39 @@ class _MedicineScreenState extends State<MedicineScreen> {
     print('Start Checking');
     try {
       for (var i = 0; i < idMedicine.length; i++) {
+        var checkCreatedCheckForm = true;
+
+        await FirebaseFirestore.instance
+            .collection('patients')
+            .doc(currentPatient.uid)
+            .collection('medicines')
+            .doc(idMedicine.values.elementAt(i))
+            .collection('medicine_time')
+            .get()
+            .then((QuerySnapshot querySnapshot) {
+          if (querySnapshot.size == 0) {
+            checkCreatedCheckForm = false;
+          }
+        });
+
+        if (checkCreatedCheckForm == false) {
+          await FirebaseFirestore.instance
+              .collection('patients')
+              .doc(currentPatient.uid)
+              .collection('medicines')
+              .doc(idMedicine.values.elementAt(i))
+              .collection('medicine_time')
+              .add({
+            'morning_dose': false,
+            'evening_dose': false,
+            'before_bed_dose': false,
+            'create_at': Timestamp.now(),
+          });
+          checkCreatedCheckForm = true;
+        }
+      }
+
+      for (var i = 0; i < idMedicine.length; i++) {
         await FirebaseFirestore.instance
             .collection('patients')
             .doc(currentPatient.uid)
@@ -293,8 +326,8 @@ class _MedicineScreenState extends State<MedicineScreen> {
   //   });
   // }
 
-  Widget buildInhalersMedicine(String nameMedicine, String numOfPress,
-      String timeToTake, int index, bool hasMed) {
+  Widget buildInhalersMedicine(String nameMedicine, String image,
+      String numOfPress, String timeToTake, int index, bool hasMed) {
     return Container(
       height: 160,
       child: Card(
@@ -337,8 +370,7 @@ class _MedicineScreenState extends State<MedicineScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ListTile(
-              leading:
-                  Image.asset('assets/images/Avamys.png', fit: BoxFit.cover),
+              leading: Image.asset(image, fit: BoxFit.cover),
               title: Text(nameMedicine),
               subtitle: Text('พ่นจมูกข้างละ $numOfPress กด'),
             ),
@@ -350,13 +382,14 @@ class _MedicineScreenState extends State<MedicineScreen> {
 
   Widget buildTabletMedicine(
     String nameMedicine,
+    String image,
     String takePerTime,
     String timeToTake,
     int index,
     bool hasMed,
   ) {
     return Container(
-      height: 160,
+      height: 170,
       child: Card(
         shape: RoundedRectangleBorder(
           // side: BorderSide(color: Colors.black, width: 1),
@@ -397,8 +430,7 @@ class _MedicineScreenState extends State<MedicineScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ListTile(
-              leading:
-                  Image.asset('assets/images/Avamys.png', fit: BoxFit.cover),
+              leading: Image.asset(image, fit: BoxFit.cover),
               title: Text(nameMedicine),
               subtitle: Text('รับประทานครั้งละ $takePerTime เม็ด'),
             ),
@@ -803,6 +835,7 @@ class _MedicineScreenState extends State<MedicineScreen> {
                             'mornIn: ${morningMed.elementAt(index).hasMorningDose}');
                         return buildInhalersMedicine(
                           morningMed.elementAt(index).nameMedicine,
+                          morningMed.elementAt(index).image,
                           morningMed.elementAt(index).numOfPress,
                           'morning_dose',
                           index,
@@ -812,6 +845,7 @@ class _MedicineScreenState extends State<MedicineScreen> {
                           'tablet') {
                         return buildTabletMedicine(
                           morningMed.elementAt(index).nameMedicine,
+                          morningMed.elementAt(index).image,
                           morningMed.elementAt(index).takePerTime,
                           'morning_dose',
                           index,
@@ -834,6 +868,7 @@ class _MedicineScreenState extends State<MedicineScreen> {
                           'inhalers') {
                         return buildInhalersMedicine(
                           eveningMed.elementAt(index).nameMedicine,
+                          eveningMed.elementAt(index).image,
                           eveningMed.elementAt(index).numOfPress,
                           'evening_dose',
                           index,
@@ -843,6 +878,7 @@ class _MedicineScreenState extends State<MedicineScreen> {
                           'tablet') {
                         return buildTabletMedicine(
                           eveningMed.elementAt(index).nameMedicine,
+                          eveningMed.elementAt(index).image,
                           eveningMed.elementAt(index).takePerTime,
                           'evening_dose',
                           index,
@@ -863,6 +899,7 @@ class _MedicineScreenState extends State<MedicineScreen> {
                     itemBuilder: (_, index) {
                       return buildTabletMedicine(
                         beforeBedMed.elementAt(index).nameMedicine,
+                        beforeBedMed.elementAt(index).image,
                         beforeBedMed.elementAt(index).takePerTime,
                         'before_bed_dose',
                         index,

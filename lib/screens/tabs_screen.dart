@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tuallergycare/screens/graph_screen.dart';
 import 'package:tuallergycare/screens/home_screen.dart';
 import 'package:tuallergycare/screens/information_screen/information_screen.dart';
 import 'package:tuallergycare/screens/proflie_screen.dart';
@@ -14,7 +15,7 @@ class _TabsScreenState extends State<TabsScreen> {
     {'page': HomeScreen(), 'title': 'home'},
     // {'page': ProfileScreen(), 'title': 'home'},
     {'page': InformationScreen(), 'title': 'information'},
-    {'page': HomeScreen(), 'title': 'graph'},
+    {'page': GraphScreen(), 'title': 'graph'},
     {'page': ProfileScreen(), 'title': 'profile'},
   ];
 

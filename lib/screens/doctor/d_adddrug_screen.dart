@@ -145,191 +145,201 @@ class _AddDrugScreenState extends State<AddDrugScreen> {
             .collection('medicines')
             .snapshots(),
         builder: (context, snapshot) {
-          return FutureBuilder(
-              future: loadMidecinePatient(),
-              builder: (context, snapshot) {
-                return Scaffold(
-                  appBar: AppBar(
-                    title: const Text('เพิ่มการใช้ยา'),
-                  ),
-                  floatingActionButton: FloatingActionButton(
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (context) => SingleChildScrollView(
-                          child: Container(
-                            padding: EdgeInsets.only(
-                                bottom:
-                                    MediaQuery.of(context).viewInsets.bottom),
-                            child: BottomSheetTypeDrug(patientId),
-                          ),
-                        ),
-                      );
-                      // Navigator.of(context).pushNamed(DrugSpay.routeName);
-                    },
-                    child: Icon(
-                      Icons.add,
-                      size: 40,
-                      color: Colors.white,
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.active) {
+            return FutureBuilder(
+                future: loadMidecinePatient(),
+                builder: (context, snapshot) {
+                  return Scaffold(
+                    appBar: AppBar(
+                      title: const Text('เพิ่มการใช้ยา'),
                     ),
-                    backgroundColor: Style().prinaryColor,
-                  ),
-                  body: GroupedListView<dynamic, dynamic>(
-                    elements: _medicine,
-                    groupBy: (element) => element.typeOfMedicine,
-                    groupSeparatorBuilder: (dynamic groupByValue) => Padding(
-                      padding: EdgeInsets.all(10),
-                      child: Row(
-                        children: [
-                          Flexible(
-                              child: Row(
-                            children: [
-                              Container(
-                                margin: EdgeInsets.only(left: 10, right: 10),
-                                child: groupByValue == 'inhalers'
-                                    ? Text(
-                                        'ยาพ่น',
-                                        textAlign: TextAlign.start,
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      )
-                                    : Text(
-                                        'ยารับประทาน',
-                                        textAlign: TextAlign.start,
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                              )
-                            ],
-                          ))
-                        ],
+                    floatingActionButton: FloatingActionButton(
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (context) => SingleChildScrollView(
+                            child: Container(
+                              padding: EdgeInsets.only(
+                                  bottom:
+                                      MediaQuery.of(context).viewInsets.bottom),
+                              child: BottomSheetTypeDrug(patientId),
+                            ),
+                          ),
+                        );
+                        // Navigator.of(context).pushNamed(DrugSpay.routeName);
+                      },
+                      child: Icon(
+                        Icons.add,
+                        size: 40,
+                        color: Colors.white,
                       ),
+                      backgroundColor: Style().prinaryColor,
                     ),
-                    itemBuilder: (context, dynamic element) {
-                      return Card(
-                        elevation: 10,
-                        margin:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        child: Container(
-                          padding: EdgeInsets.all(10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                  child: ClipRRect(
-                                child: Image(
-                                  image: AssetImage(element.image),
-                                  fit: BoxFit.cover,
-                                  height: 100,
-                                  width: 100,
-                                ),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(5)),
-                              )),
-                              Expanded(
-                                flex: 2,
-                                child: Container(
-                                  padding: EdgeInsets.only(bottom: 10),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                            left: 10, right: 10),
-                                        child: Text(
-                                          element.nameMedicine,
+                    body: GroupedListView<dynamic, dynamic>(
+                      elements: _medicine,
+                      groupBy: (element) => element.typeOfMedicine,
+                      groupSeparatorBuilder: (dynamic groupByValue) => Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Row(
+                          children: [
+                            Flexible(
+                                child: Row(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(left: 10, right: 10),
+                                  child: groupByValue == 'inhalers'
+                                      ? Text(
+                                          'ยาพ่น',
+                                          textAlign: TextAlign.start,
                                           style: TextStyle(
-                                            fontSize: 16,
+                                            fontSize: 18,
                                             fontWeight: FontWeight.bold,
                                           ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                            left: 10, right: 10),
-                                        child: Text(
-                                          // element['detailDrug'],
-                                          textTimeMedicine(element),
+                                        )
+                                      : Text(
+                                          'ยารับประทาน',
+                                          textAlign: TextAlign.start,
                                           style: TextStyle(
-                                            fontSize: 16,
+                                            fontSize: 18,
                                             fontWeight: FontWeight.bold,
                                           ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                            left: 10, right: 10),
-                                        child: Text(
-                                          testDosageMedicine(element),
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                            left: 10, right: 10, top: 5),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            RaisedButton(
-                                              child: Text(
-                                                'ยกเลิก',
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                              color: Colors.grey,
-                                              onPressed: () {},
-                                            ),
-                                            SizedBox(
-                                              width: 20,
-                                            ),
-                                            RaisedButton(
-                                              child: Text(
-                                                'แก้ไข',
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                              color: Colors.grey,
-                                              onPressed: () {},
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
+                                )
+                              ],
+                            ))
+                          ],
                         ),
-                      );
-                    },
-                    itemComparator: (item1, item2) => item1.nameMedicine
-                        .compareTo(item2.nameMedicine), // optional
-                    useStickyGroupSeparators: true, // optional
-                    floatingHeader: true, // optional
-                    order: GroupedListOrder.ASC, // optional
-                  ),
-                );
-              });
+                      ),
+                      itemBuilder: (context, dynamic element) {
+                        return Card(
+                          elevation: 10,
+                          margin: EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                          child: Container(
+                            padding: EdgeInsets.all(10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                    child: ClipRRect(
+                                  child: Image(
+                                    image: AssetImage(element.image),
+                                    fit: BoxFit.cover,
+                                    height: 100,
+                                    width: 100,
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(5)),
+                                )),
+                                Expanded(
+                                  flex: 2,
+                                  child: Container(
+                                    padding: EdgeInsets.only(bottom: 10),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 10, right: 10),
+                                          child: Text(
+                                            element.nameMedicine,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 10, right: 10),
+                                          child: Text(
+                                            // element['detailDrug'],
+                                            textTimeMedicine(element),
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 10, right: 10),
+                                          child: Text(
+                                            testDosageMedicine(element),
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 10, right: 10, top: 5),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              RaisedButton(
+                                                child: Text(
+                                                  'ยกเลิก',
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                                color: Colors.grey,
+                                                onPressed: () {},
+                                              ),
+                                              SizedBox(
+                                                width: 20,
+                                              ),
+                                              RaisedButton(
+                                                child: Text(
+                                                  'แก้ไข',
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                                color: Colors.grey,
+                                                onPressed: () {},
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      itemComparator: (item1, item2) => item1.nameMedicine
+                          .compareTo(item2.nameMedicine), // optional
+                      useStickyGroupSeparators: true, // optional
+                      floatingHeader: true, // optional
+                      order: GroupedListOrder.ASC, // optional
+                    ),
+                  );
+                });
+          }
         });
   }
 }

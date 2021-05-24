@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 // enum StatusPatient {
@@ -46,6 +47,8 @@ class _StateBoardState extends State<StateBoard> {
   double avgVasScore = 0;
   Map<String, dynamic> lastData;
   List<int> lastVasScores = [];
+  var hasAnalysed;
+  var idRecentAssessment;
 
   @override
   void initState() {
@@ -103,52 +106,90 @@ class _StateBoardState extends State<StateBoard> {
         .then((QuerySnapshot querySnapshot) {
       numOfAssessments = querySnapshot.size;
     });
-    // print('init: $initNumAssessment');
-    // print('numOf: $numOfAssessments');
-    if (numOfAssessments != null &&
-        numOfAssessments >= 3 &&
-        initNumAssessment != numOfAssessments && initNumAssessment != 0) {
-          // print('initIN: $initNumAssessment');
-          // print('numOfIN: $numOfAssessments');
-      initNumAssessment = numOfAssessments;
-      await FirebaseFirestore.instance
-          .collection('patients')
-          .doc(currentPatient.uid)
-          .collection('assessments')
-          .orderBy('created', descending: true)
-          .limit(3)
-          .get()
-          .then((QuerySnapshot querySnapshot) {
-        // print('nosalC: ${querySnapshot.docs.last.data()['assessment']['congrestion_nasal']}');
-        // print('status: $presentStatusPatient');
-        print(
-            'nosalC: ${querySnapshot.docs.first['assessment']['congrestion_nasal']}');
-        if (querySnapshot.docs.first.data()['assessment']['congrestion_nasal'] >
-            0) {
-          // print('nosalC: ${querySnapshot.docs.last.data()['assessment']['congrestion_nasal']}');
-          hasCongrestionNasal = true;
-          // print('hasC: $hasCongrestionNasal');
-        } else {
-          hasCongrestionNasal = false;
-          // print('hasC: $hasCongrestionNasal');
-        }
+    print('init: $initNumAssessment');
+    print('numOf: $numOfAssessments');
+    // print('initIN: $initNumAssessment');
+    //   print('numOfIN: $numOfAssessments');
 
-        if (lastVasScores.isNotEmpty) {
-          lastVasScores.clear();
-        }
+    await await FirebaseFirestore.instance
+        .collection('patients')
+        .doc(currentPatient.uid)
+        .collection('assessments')
+        .orderBy('created', descending: true)
+        .limit(1)
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      idRecentAssessment = querySnapshot.docs.first.id;
+      hasAnalysed = querySnapshot.docs.first.data()['analysed'];
+    });
 
-        querySnapshot.docs
-            .forEach((QueryDocumentSnapshot queryDocumentSnapshot) {
-          lastVasScores
-              .add(queryDocumentSnapshot.data()['assessment']['vas_score']);
+    try {
+      if (numOfAssessments != null &&
+          numOfAssessments >= 3 &&
+          // initNumAssessment != numOfAssessments &&
+          hasAnalysed == false &&
+          initNumAssessment != 0) {
+        // print('initIN: $initNumAssessment');
+        // print('numOfIN: $numOfAssessments');
+        initNumAssessment = numOfAssessments;
+
+        await FirebaseFirestore.instance
+            .collection('patients')
+            .doc(currentPatient.uid)
+            .collection('assessments')
+            .doc(idRecentAssessment)
+            .update({
+          'analysed': true,
         });
-        avgVasScore =
-            (lastVasScores[0] + lastVasScores[1] + lastVasScores[2]) / 3;
-        // print(lastVasScores);
-        // print(avgVasScore);
 
-        defindStatus(hasCongrestionNasal, avgVasScore);
-      });
+        await FirebaseFirestore.instance
+            .collection('patients')
+            .doc(currentPatient.uid)
+            .collection('assessments')
+            .orderBy('created', descending: true)
+            .limit(3)
+            .get()
+            .then((QuerySnapshot querySnapshot) {
+          // print('nosalC: ${querySnapshot.docs.last.data()['assessment']['congrestion_nasal']}');
+          print('status: $presentStatusPatient');
+          print(
+              'nosalC: ${querySnapshot.docs.first['assessment']['congrestion_nasal']}');
+          if (querySnapshot.docs.first.data()['assessment']
+                  ['congrestion_nasal'] >
+              0) {
+            // print('nosalC: ${querySnapshot.docs.last.data()['assessment']['congrestion_nasal']}');
+            hasCongrestionNasal = true;
+            // print('hasC: $hasCongrestionNasal');
+          } else {
+            hasCongrestionNasal = false;
+            // print('hasC: $hasCongrestionNasal');
+          }
+
+          if (lastVasScores.isNotEmpty) {
+            lastVasScores.clear();
+          }
+
+          querySnapshot.docs
+              .forEach((QueryDocumentSnapshot queryDocumentSnapshot) {
+            lastVasScores
+                .add(queryDocumentSnapshot.data()['assessment']['vas_score']);
+          });
+          avgVasScore =
+              (lastVasScores[0] + lastVasScores[1] + lastVasScores[2]) / 3;
+          print(lastVasScores);
+          print(avgVasScore);
+
+          defindStatus(hasCongrestionNasal, avgVasScore);
+        });
+
+        await FirebaseFirestore.instance
+            .collection('patients')
+            .doc(currentPatient.uid)
+            .update({'status': presentStatusPatient});
+      }
+    } catch (e) {
+      print('Error Assess Call');
+      print(e);
     }
   }
 
@@ -233,92 +274,129 @@ class _StateBoardState extends State<StateBoard> {
         break;
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Object>(
-        stream: StreamGroup.merge(
-            [FirebaseFirestore.instance
-                .collection('patients')
-                .doc(currentPatient.uid)
-                .collection('assessments')
-                .snapshots(),
-            FirebaseFirestore.instance
-              .collection('patients').doc(currentPatient.uid).snapshots(includeMetadataChanges: true)]),
+        stream: StreamGroup.merge([
+          FirebaseFirestore.instance
+              .collection('patients')
+              .doc(currentPatient.uid)
+              .collection('assessments')
+              .snapshots(),
+          FirebaseFirestore.instance
+              .collection('patients')
+              .doc(currentPatient.uid)
+              .snapshots(includeMetadataChanges: true)
+        ]),
         // stream:FirebaseFirestore.instance
         //         .collection('patients')
         //         .doc(currentPatient.uid)
         //         .collection('assessments')
         //         .snapshots(),
         builder: (context, snapshot) {
-          return FutureBuilder(
-              future: analyzeAssessments(),
-              builder: (context, futureSnapshot) {
-                if (futureSnapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                return Container(
-                  height: 170,
-                  color: Theme.of(context).primaryColor,
-                  padding: EdgeInsets.only(top: 50),
-                  child: Container(
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.active) {
+            print('build af asses');
+            return FutureBuilder(
+                future: analyzeAssessments(),
+                builder: (context, futureSnapshot) {
+                  if (futureSnapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  return Container(
+                    height: 170,
+                    color: Theme.of(context).primaryColor,
+                    padding: EdgeInsets.only(top: 50),
                     child: Container(
-                      child: Row(
-                        children: [
-                          Container(
-                              margin: EdgeInsets.fromLTRB(25, 0, 0, 10),
-                              height: 100,
-                              // padding: EdgeInsets.all(15),
-                              child: hasStatus
-                                  ? Image.asset(
-                                      selectedImage(presentStatusPatient),
-                                      fit: BoxFit.cover)
-                                  : SizedBox(
-                                      width: 40,
-                                    )),
-                          Container(
-                            margin: EdgeInsets.fromLTRB(30, 0, 0, 0),
-                            child: Column(
-                              children: [
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Container(
-                                  child: Text(
-                                    hasStatus
-                                        ? 'สถานะของผู้ป่วย $presentStatusPatient'
-                                        : 'ยังไม่มีสถานะผู้ป่วย',
-                                    style: TextStyle(
-                                      // fontWeight: FontWeight.bold,
-                                      fontSize: 28,
-                                      color: Theme.of(context).accentColor,
+                      child: Container(
+                        child: Row(
+                          children: [
+                            Container(
+                                margin: EdgeInsets.fromLTRB(25, 0, 0, 10),
+                                height: 100,
+                                // padding: EdgeInsets.all(15),
+                                child: hasStatus
+                                    ? Image.asset(
+                                        selectedImage(presentStatusPatient),
+                                        fit: BoxFit.cover)
+                                    : SizedBox(
+                                        width: 40,
+                                      )),
+                            Container(
+                              margin: EdgeInsets.fromLTRB(30, 0, 0, 0),
+                              child: Column(
+                                children: [
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Container(
+                                    child: Text(
+                                      hasStatus
+                                          ? 'สถานะของผู้ป่วย'
+                                          : 'ยังไม่มีสถานะผู้ป่วย',
+                                      style: TextStyle(
+                                        // fontWeight: FontWeight.bold,
+                                        fontSize: 28,
+                                        color: Theme.of(context).accentColor,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 4,
-                                ),
-                                Container(
-                                  child: Text(
-                                    definitionOfStatusPatient(
-                                        presentStatusPatient),
-                                    style: TextStyle(
-                                      // fontWeight: FontWeight.bold,
-                                      fontSize: 20,
-                                      color: Theme.of(context).accentColor,
+                                  SizedBox(
+                                    height: 4,
+                                  ),
+                                  Container(
+                                    child: Text(
+                                      definitionOfStatusPatient(
+                                          presentStatusPatient),
+                                      style: TextStyle(
+                                        // fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        color: Theme.of(context).accentColor,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                            IconButton(
+                              onPressed: () async {
+                                Navigator.popUntil(
+                                    context,
+                                    ModalRoute.withName(
+                                        Navigator.defaultRouteName));
+                                await FirebaseAuth.instance.signOut();
+                                print('canpop ${Navigator.canPop(context)}');
+                              },
+                              icon: Icon(
+                                Icons.exit_to_app,
+                                color: Colors.white,
+                              ),
+                            ),
+                            // TextButton(
+                            //     onPressed: () async {
+                            //       Navigator.popUntil(
+                            //           context,
+                            //           ModalRoute.withName(
+                            //               Navigator.defaultRouteName));
+                            //       await FirebaseAuth.instance.signOut();
+                            //       print('canpop ${Navigator.canPop(context)}');
+                            //     },
+                            //     child: Text('ออกจากระบบ'))
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              });
+                  );
+                });
+          }
         });
   }
 }

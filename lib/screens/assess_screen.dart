@@ -116,7 +116,10 @@ class _AssessScreenState extends State<AssessScreen> {
           .doc(currentPateint.uid)
           .collection('assessments')
           .doc(idRecentAssessment)
-          .update({'assessment': _assestment});
+          .update({
+        'assessment': _assestment,
+        'analysed': false,
+      });
       //     .add({
       //   'assessment': _assestment,
       //   'created': Timestamp.now(),
@@ -422,6 +425,7 @@ class _AssessScreenState extends State<AssessScreen> {
                               .add({
                             'assessment': _assestment,
                             'created': Timestamp.now(),
+                            'analysed': false,
                           });
 
                           // await FirebaseFirestore.instance

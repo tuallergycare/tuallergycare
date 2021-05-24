@@ -15,6 +15,7 @@ import 'package:tuallergycare/screens/doctor/d_skintest.dart';
 import 'package:tuallergycare/screens/doctor/d_tabs_screen.dart';
 import 'package:tuallergycare/screens/edit_profile_screen.dart';
 import 'package:tuallergycare/screens/first_assess_screen.dart';
+import 'package:tuallergycare/screens/graph_screen.dart';
 import 'package:tuallergycare/screens/information_screen/medicine/medicine_info_screen.dart';
 import 'package:tuallergycare/screens/information_screen/stimulus/stimulus_screen.dart';
 import 'package:tuallergycare/screens/medicine_screen.dart';
@@ -240,6 +241,7 @@ class _MyAppState extends State<MyApp> {
         DrugSpay.routeName: (ctx) => DrugSpay(),
         Diagnose.routeName: (ctx) => Diagnose(),
         Appointment.routeName: (ctx) => Appointment(),
+        GraphScreen.routeName: (ctx) => GraphScreen(),
       },
     );
   }

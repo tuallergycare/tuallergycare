@@ -151,7 +151,6 @@ class _PatientTodayState extends State<PatientToday> {
     super.dispose();
   }
 
-  @override
   void selectPatient(BuildContext context, String id) {
     Navigator.of(context)
         .pushNamed(PatientProfileScreen.routeName, arguments: id);
@@ -181,28 +180,32 @@ class _PatientTodayState extends State<PatientToday> {
           //     .data()['create_at']
           //     .microsecondsSinceEpoch);
           // difDate.add(now.difference(recentDate).inDays);
-          var date = DateTime.fromMicrosecondsSinceEpoch(
-              doc.data()['appointment']['day'].microsecondsSinceEpoch);
-          var difdate = today.difference(date).inDays;
-          print('today ${today.day}');
-          print('date ${date.day}');
-          print(difdate);
-          if (today.day == date.day) {
-            print('inPaTodat');
-            _patients.add(new Patient(
-              doc.id,
-              doc.data()['username'],
-              doc.data()['weight'],
-              doc.data()['height'],
-              doc.data()['phone_number'],
-              doc.data()['gender'],
-              doc.data()['birth_day'],
-              doc.data()['status'],
-              doc.data()['image'],
-              doc.data()['research'],
-              doc.data()['skintest'],
-              doc.data()['appointment'],
-            ));
+          print('iiiii: ${_idPatients.elementAt(i)}');
+          print('ddddddd: ${doc.data()['username']}');
+          if (doc.data()['appointment'] != null) {
+            var date = DateTime.fromMicrosecondsSinceEpoch(
+                doc.data()['appointment']['day'].microsecondsSinceEpoch);
+            var difdate = today.difference(date).inDays;
+            print('today ${today.day}');
+            print('date ${date.day}');
+            print(difdate);
+            if (today.day == date.day) {
+              print('inPaTodat');
+              _patients.add(new Patient(
+                doc.id,
+                doc.data()['username'],
+                doc.data()['weight'],
+                doc.data()['height'],
+                doc.data()['phone_number'],
+                doc.data()['gender'],
+                doc.data()['birth_day'],
+                doc.data()['status'],
+                doc.data()['image'],
+                doc.data()['research'],
+                doc.data()['skintest'],
+                doc.data()['appointment'],
+              ));
+            }
           }
         });
       }
@@ -456,7 +459,7 @@ class PatientAll extends StatefulWidget {
 class _PatientAllState extends State<PatientAll> {
   CalendarController _calendar;
   List<dynamic> _idPatients = [];
-  List<Patient> _patients = [];
+  List<Patient> _patientsAll = [];
   final currentPatient = FirebaseAuth.instance.currentUser;
 
   @override
@@ -483,13 +486,17 @@ class _PatientAllState extends State<PatientAll> {
         _idPatients = doc.data()['patients'];
       });
 
+      _idPatients.forEach((element) {
+        print(element);
+      });
+
       for (var i = 0; i < _idPatients.length; i++) {
         await FirebaseFirestore.instance
             .collection('patients')
             .doc(_idPatients.elementAt(i))
             .get()
             .then((doc) {
-          _patients.add(new Patient(
+          _patientsAll.add(new Patient(
             doc.id,
             doc.data()['username'],
             doc.data()['weight'],
@@ -507,7 +514,7 @@ class _PatientAllState extends State<PatientAll> {
       }
 
       print('idPatients: $_idPatients');
-      print('pateints: ${_patients.first.username}');
+      print('pateints: ${_patientsAll.first.username}');
     } catch (e) {
       print('getPatiError');
       print(e);
@@ -569,78 +576,19 @@ class _PatientAllState extends State<PatientAll> {
                       print("build all");
                       try {
                         return _buildCardAll(
-                          _patients.elementAt(index).username,
-                          _patients.elementAt(index).gender,
-                          _patients.elementAt(index).status,
-                          _patients.elementAt(index).image,
+                          _patientsAll.elementAt(index).id,
+                          _patientsAll.elementAt(index).username,
+                          _patientsAll.elementAt(index).gender,
+                          _patientsAll.elementAt(index).status,
+                          _patientsAll.elementAt(index).image,
                         );
                       } catch (e) {
                         print('build Patient All');
                         print(e);
                       }
                     },
-                    itemCount: _patients.length,
+                    itemCount: _patientsAll.length,
                   ),
-                  // child: GridView.count(
-                  //   crossAxisCount: 2,
-                  //   primary: false,
-                  //   crossAxisSpacing: 5.0,
-                  //   mainAxisSpacing: 5.0,
-                  //   childAspectRatio: 1.0,
-                  //   children: <Widget>[
-                  //     _buildCard(
-                  //         'สมจิต สมใจ',
-                  //         '09.00-10.00 น',
-                  //         'assets/images/pone.png',
-                  //         'ปานกลาง',
-                  //         'assets/images/status_yellow.png',
-                  //         context),
-                  //     _buildCard(
-                  //         'สมหมาย ดั่งใจ',
-                  //         '10.00-11.00 น',
-                  //         'assets/images/ptwo.png',
-                  //         'น้อย',
-                  //         'assets/images/status_green.png',
-                  //         context),
-                  //     _buildCard(
-                  //         'สมศรี ยิ้มสยาม',
-                  //         '11.00-12.00 น',
-                  //         'assets/images/ptree.png',
-                  //         'ค่อนข้างรุนแรง',
-                  //         'assets/images/status_orange.png',
-                  //         context),
-                  //     _buildCard(
-                  //         'สมหญิง ชอบสมชาย',
-                  //         '09.00-10.00 น',
-                  //         'assets/images/pfour.png',
-                  //         'รุนแรงที่สุด',
-                  //         'assets/images/status_red.png',
-                  //         context),
-                  //     _buildCard(
-                  //         'สมชาย รักสมฤดี',
-                  //         '14.00-15.00 น',
-                  //         'assets/images/pfive.png',
-                  //         'น้อย',
-                  //         'assets/images/status_green.png',
-                  //         context),
-                  //     _buildCard(
-                  //         'สมจิต ใจดี',
-                  //         '10.00-11.00 น',
-                  //         'assets/images/pfour.png',
-                  //         'รุนแรงที่สุด',
-                  //         'assets/images/status_red.png',
-                  //         context),
-                  //     _buildCard(
-                  //         'สายใย กันและกัน',
-                  //         '11.00-12.00 น',
-                  //         'assets/images/pfive.png',
-                  //         'น้อย',
-                  //         'assets/images/status_green.png',
-                  //         context)
-                  // ],
-                  //   ),
-                  // ),
-                  // ],
                 ),
               ],
             ),
@@ -648,7 +596,12 @@ class _PatientAllState extends State<PatientAll> {
         });
   }
 
-  Widget _buildCardAll(String name, String gender, String status, String img) {
+  void selectPatient(BuildContext context, String id) {
+    Navigator.of(context)
+        .pushNamed(PatientProfileScreen.routeName, arguments: id);
+  }
+
+  Widget _buildCardAll(String id, String name, String gender, String status, String img) {
     var statusIcon;
     if (status == 'T0') {
       statusIcon = 'assets/images/status_green.png';
@@ -662,7 +615,7 @@ class _PatientAllState extends State<PatientAll> {
     return Padding(
       padding: EdgeInsets.only(top: 5.0, bottom: 5.0, left: 15.0, right: 5.0),
       child: InkWell(
-        onTap: () {},
+        onTap: () => selectPatient(context, id),
         child: Container(
           // constraints: BoxConstraints(minHeight: 800),
           decoration: BoxDecoration(

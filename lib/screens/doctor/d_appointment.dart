@@ -12,6 +12,7 @@ class Appointment extends StatefulWidget {
 
 class _AppointmentState extends State<Appointment> {
   CalendarController _calendarController;
+  String patientId;
   List<String> chipTime = [
     "09.00-10.00น.",
     "10.00-11.00น.",
@@ -46,6 +47,7 @@ class _AppointmentState extends State<Appointment> {
 
   @override
   Widget build(BuildContext context) {
+    patientId = ModalRoute.of(context).settings.arguments as String;
     return Scaffold(
       // appBar: AppBar(
       //   title: const Text('จองเวลานัดหมาย'),
@@ -149,7 +151,6 @@ class _AppointmentState extends State<Appointment> {
                         spacing: 5.0,
                         runSpacing: 5.0,
                         children: <Widget>[
-                          choiceChipWidget(chipTime),
                           ChoiceChip(
                             label: Text("09.00-10.00น."),
                             labelStyle: TextStyle(
@@ -168,7 +169,216 @@ class _AppointmentState extends State<Appointment> {
                                 // widget.selectedTime = selectedChoice;
                               });
                             },
-                          )
+                          ),
+                          ChoiceChip(
+                            label: Text("10.00-11.00น."),
+                            labelStyle: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            backgroundColor: Color(0xffededed),
+                            selectedColor: Style().prinaryColor,
+                            selected: selectedTime == "10.00-11.00น.",
+                            onSelected: (selected) {
+                              setState(() {
+                                selectedTime = "10.00-11.00น.";
+                                // widget.selectedTime = selectedChoice;
+                              });
+                            },
+                          ),
+                          ChoiceChip(
+                            label: Text("11.00-12.00น."),
+                            labelStyle: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            backgroundColor: Color(0xffededed),
+                            selectedColor: Style().prinaryColor,
+                            selected: selectedTime == "11.00-12.00น.",
+                            onSelected: (selected) {
+                              setState(() {
+                                selectedTime = "11.00-12.00น.";
+                                // widget.selectedTime = selectedChoice;
+                              });
+                            },
+                          ),
+                          ChoiceChip(
+                            label: Text("12.00-13.00น."),
+                            labelStyle: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            backgroundColor: Color(0xffededed),
+                            selectedColor: Style().prinaryColor,
+                            selected: selectedTime == "12.00-13.00น.",
+                            onSelected: (selected) {
+                              setState(() {
+                                selectedTime = "12.00-13.00น.";
+                                // widget.selectedTime = selectedChoice;
+                              });
+                            },
+                          ),
+                          ChoiceChip(
+                            label: Text("13.00-14.00น."),
+                            labelStyle: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            backgroundColor: Color(0xffededed),
+                            selectedColor: Style().prinaryColor,
+                            selected: selectedTime == "13.00-14.00น.",
+                            onSelected: (selected) {
+                              setState(() {
+                                selectedTime = "13.00-14.00น.";
+                                // widget.selectedTime = selectedChoice;
+                              });
+                            },
+                          ),
+                          ChoiceChip(
+                            label: Text("14.00-15.00น."),
+                            labelStyle: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            backgroundColor: Color(0xffededed),
+                            selectedColor: Style().prinaryColor,
+                            selected: selectedTime == "14.00-15.00น.",
+                            onSelected: (selected) {
+                              setState(() {
+                                selectedTime = "14.00-15.00น.";
+                                // widget.selectedTime = selectedChoice;
+                              });
+                            },
+                          ),
+                          ChoiceChip(
+                            label: Text("15.00-16.00น."),
+                            labelStyle: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            backgroundColor: Color(0xffededed),
+                            selectedColor: Style().prinaryColor,
+                            selected: selectedTime == "15.00-16.00น.",
+                            onSelected: (selected) {
+                              setState(() {
+                                selectedTime = "15.00-16.00น.";
+                                // widget.selectedTime = selectedChoice;
+                              });
+                            },
+                          ),
+                          ChoiceChip(
+                            label: Text("16.00-17.00น."),
+                            labelStyle: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            backgroundColor: Color(0xffededed),
+                            selectedColor: Style().prinaryColor,
+                            selected: selectedTime == "16.00-17.00น.",
+                            onSelected: (selected) {
+                              setState(() {
+                                selectedTime = "16.00-17.00น.";
+                                // widget.selectedTime = selectedChoice;
+                              });
+                            },
+                          ),
+                          ChoiceChip(
+                            label: Text("17.00-18.00น."),
+                            labelStyle: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            backgroundColor: Color(0xffededed),
+                            selectedColor: Style().prinaryColor,
+                            selected: selectedTime == "17.00-18.00น.",
+                            onSelected: (selected) {
+                              setState(() {
+                                selectedTime = "17.00-18.00น.";
+                                // widget.selectedTime = selectedChoice;
+                              });
+                            },
+                          ),
+                          ChoiceChip(
+                            label: Text("18.00-19.00น."),
+                            labelStyle: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            backgroundColor: Color(0xffededed),
+                            selectedColor: Style().prinaryColor,
+                            selected: selectedTime == "18.00-19.00น.",
+                            onSelected: (selected) {
+                              setState(() {
+                                selectedTime = "18.00-19.00น.";
+                                // widget.selectedTime = selectedChoice;
+                              });
+                            },
+                          ),
+                          ChoiceChip(
+                            label: Text("19.00-20.00น."),
+                            labelStyle: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            backgroundColor: Color(0xffededed),
+                            selectedColor: Style().prinaryColor,
+                            selected: selectedTime == "19.00-20.00น.",
+                            onSelected: (selected) {
+                              setState(() {
+                                selectedTime = "19.00-20.00น.";
+                                // widget.selectedTime = selectedChoice;
+                              });
+                            },
+                          ),
+                          ChoiceChip(
+                            label: Text("20.00-21.00น."),
+                            labelStyle: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            backgroundColor: Color(0xffededed),
+                            selectedColor: Style().prinaryColor,
+                            selected: selectedTime == "20.00-21.00น.",
+                            onSelected: (selected) {
+                              setState(() {
+                                selectedTime = "20.00-21.00น.";
+                                // widget.selectedTime = selectedChoice;
+                              });
+                            },
+                          ),
                         ],
                       ),
                     ),
@@ -198,10 +408,47 @@ class _AppointmentState extends State<Appointment> {
                               style: TextStyle(color: Colors.white),
                             ),
                             color: Style().prinaryColor,
-                            onPressed: () {
-                              print(selectedDate);
-                              // print(selectedChoice);
+                            onPressed: () async {
+                              if (selectedDate == null ||
+                                  selectedTime == null) {
+                                await showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text('กรุณากรอกข้อมูลให้ครบ'),
+                                    // content: Text('Something went wrong.'),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: Text(
+                                          'ตกลง',
+                                          style: TextStyle(
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          return;
+                                        },
+                                      )
+                                    ],
+                                  ),
+                                );
+                              }
+
+                              await FirebaseFirestore.instance
+                                  .collection('patients')
+                                  .doc(patientId)
+                                  .update(
+                                {
+                                  'appointment': {
+                                    'day': selectedDate,
+                                    'time': selectedTime
+                                  }
+                                },
+                              );
+                              Navigator.pop(context);
                             },
+                          
                           ),
                         ],
                       ),
