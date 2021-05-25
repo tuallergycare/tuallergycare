@@ -318,6 +318,7 @@ class _StateBoardState extends State<StateBoard> {
                     child: Container(
                       child: Container(
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             Container(
                                 margin: EdgeInsets.fromLTRB(25, 0, 0, 10),

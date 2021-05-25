@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tuallergycare/screens/doctor/d_patientprofile_screen.dart';
+import 'package:tuallergycare/screens/doctor/d_qrcode.dart';
 import 'package:tuallergycare/utility/style.dart';
 //import 'package:qr_code_scanner/qr_code_scanner.dart';
 
@@ -21,6 +22,11 @@ class DoctorHomeScreen extends StatefulWidget {
 
 class DoctorHomeScreenState extends State<DoctorHomeScreen> {
   final currentUser = FirebaseAuth.instance.currentUser;
+  String qrCode = 'Unknown';
+  @override
+  void initState() {
+    super.initState();
+  }
   // String qrCode = 'Unknown';
   @override
   Widget build(BuildContext context) {
@@ -38,7 +44,9 @@ class DoctorHomeScreenState extends State<DoctorHomeScreen> {
             IconButton(
               icon: const Icon(Icons.person_add_alt_rounded),
               tooltip: 'Scan QR Code',
-              onPressed: () => {},
+              onPressed: (){
+                Navigator.pushNamed(context, Scanner.routeName);
+              },
             ),
             IconButton(
               onPressed: () async {
@@ -168,7 +176,6 @@ class _PatientTodayState extends State<PatientToday> {
           .then((doc) {
         _idPatients = doc.data()['patients'];
       });
-
       for (var i = 0; i < _idPatients.length; i++) {
         await FirebaseFirestore.instance
             .collection('patients')
@@ -486,9 +493,9 @@ class _PatientAllState extends State<PatientAll> {
         _idPatients = doc.data()['patients'];
       });
 
-      _idPatients.forEach((element) {
-        print(element);
-      });
+      // _idPatients.forEach((element) {
+      //   print(element);
+      // });
 
       for (var i = 0; i < _idPatients.length; i++) {
         await FirebaseFirestore.instance
@@ -514,7 +521,7 @@ class _PatientAllState extends State<PatientAll> {
       }
 
       print('idPatients: $_idPatients');
-      print('pateints: ${_patientsAll.first.username}');
+      // print('pateints: ${_patientsAll.first.username}');
     } catch (e) {
       print('getPatiError');
       print(e);

@@ -19,6 +19,7 @@ class DoctorFormScreenState extends State<DoctorFormScreen> {
   String _licenseNumber;
   String _gender;
   String _specialty;
+  List _patients = [];
 
   final _auth = FirebaseAuth.instance;
   
@@ -355,6 +356,7 @@ class DoctorFormScreenState extends State<DoctorFormScreen> {
                               'weight': null,
                               'license': _licenseNumber,
                               'specialty': _specialty,
+                              'patients': _patients
                             });
                       } catch (e) {
                         print('Doctor Register Error: $e');

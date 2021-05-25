@@ -114,74 +114,79 @@ class _HomeScreenState extends State<HomeScreen> {
     year = (today.year + 543).toString();
 
     return StreamBuilder<Object>(
-      stream: FirebaseFirestore.instance
-                  .collection('patients')
-                  .doc(currentPatient.uid)
-                  .collection('assessments')
-                  .snapshots(),
-      builder: (context, snapshot) {
-        return FutureBuilder(
-            future: checkDateAssestment(),
-            builder: (context, snapshot) {
-              return Column(
-                children: [
-                  Container(
-                    child: StateBoard(),
-                  ),
-                  Container(
-                    alignment: Alignment.centerLeft,
-                    padding: EdgeInsets.all(15),
-                    child: Text(
-                      '${day}ที่ ${today.day} ${month} ${year}',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+        stream: FirebaseFirestore.instance
+            .collection('patients')
+            .doc(currentPatient.uid)
+            .collection('assessments')
+            .snapshots(),
+        builder: (context, snapshot) {
+          return FutureBuilder(
+              future: checkDateAssestment(),
+              builder: (context, snapshot) {
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Container(
+                        child: StateBoard(),
                       ),
-                    ),
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        padding: EdgeInsets.all(15),
+                        child: Text(
+                          '${day}ที่ ${today.day} ${month} ${year}',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(top: 30),
+                        child: ButtonHome(
+                          message: "ยากินวันนี้",
+                          height: screen * 0.25,
+                          width: screen * 0.95,
+                          color: Colors.blue,
+                          icon: Icons.book,
+                          iconSize: 60.0,
+                          //radius: 46.0,
+                          onClick: () {
+                            Navigator.pushNamed(
+                                context, MedicineScreen.routeName);
+                          },
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(top: 30),
+                        child: ButtonHome(
+                          message: "ประเมินอาการ",
+                          height: screen * 0.25,
+                          width: screen * 0.95,
+                          color: sameDate ? Colors.yellow[800] : Colors.pink,
+                          icon: Icons.text_snippet_rounded,
+                          iconSize: 60.0,
+                          //radius: 46.0,
+                          onClick: () {
+                            Navigator.of(context).pushNamed(
+                                AssessScreen.routeName,
+                                arguments: sameDate);
+                          },
+                        ),
+                      ),
+                      TextButton(
+                          onPressed: () async {
+                            Navigator.popUntil(
+                                context,
+                                ModalRoute.withName(
+                                    Navigator.defaultRouteName));
+                            await FirebaseAuth.instance.signOut();
+                            print('canpop ${Navigator.canPop(context)}');
+                          },
+                          child: Text('ออกจากระบบ'))
+                    ],
                   ),
-                  Container(
-                    margin: EdgeInsets.only(top: 30),
-                    child: ButtonHome(
-                      message: "ยากินวันนี้",
-                      height: screen * 0.25,
-                      width: screen * 0.95,
-                      color: Colors.blue,
-                      icon: Icons.book,
-                      iconSize: 60.0,
-                      //radius: 46.0,
-                      onClick: () {
-                        Navigator.pushNamed(context, MedicineScreen.routeName);
-                      },
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(top: 30),
-                    child: ButtonHome(
-                      message: "ประเมินอาการ",
-                      height: screen * 0.25,
-                      width: screen * 0.95,
-                      color: sameDate ? Colors.yellow[800]:Colors.pink,
-                      icon: Icons.text_snippet_rounded,
-                      iconSize: 60.0,
-                      //radius: 46.0,
-                      onClick: () {
-                        Navigator.of(context)
-                            .pushNamed(AssessScreen.routeName, arguments: sameDate);
-                      },
-                    ),
-                  ),
-                  TextButton(
-                      onPressed: () async {
-                        Navigator.popUntil(context,
-                            ModalRoute.withName(Navigator.defaultRouteName));
-                        await FirebaseAuth.instance.signOut();
-                        print('canpop ${Navigator.canPop(context)}');
-                      },
-                      child: Text('ออกจากระบบ'))
-                ],
-              );
-            });
-      }
-    );
+                );
+              });
+        });
   }
 }

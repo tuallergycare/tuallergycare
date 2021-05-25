@@ -40,7 +40,6 @@ enum Profile { patient }
 
 class _ProfilescreenState extends State<ProfileScreen> {
   final currentPatient = FirebaseAuth.instance.currentUser;
-  final _picker = ImagePicker();
   File _patientImage;
   String _namePatient;
   String _birthday;
@@ -49,6 +48,7 @@ class _ProfilescreenState extends State<ProfileScreen> {
   String _gender;
   String _phoneNumber;
   String _disease;
+  String _imagePatient;
   List<String> _medicine = <String>[];
   List<dynamic> _skintest = <dynamic>[];
   String _research;
@@ -59,29 +59,32 @@ class _ProfilescreenState extends State<ProfileScreen> {
     super.initState();
   }
 
-  Future<void> setImage() async {
-    // final ref = FirebaseStorage.instance
-    //     .ref()
-    //     .child('user_image')
-    //     .child(currentPatient.uid + '.jpg');
+  final picker = ImagePicker();
 
-    // // await ref.putFile(patientImage);
+  Future getImagefromcamera() async {
+    final pickedImage = await picker.getImage(
+      source: ImageSource.camera,
+      imageQuality: 100,
+      maxWidth: 300,
+    );
 
-    // final url = await ref.getDownloadURL();
+    if (pickedImage != null) {
+      _patientImage = File(pickedImage.path);
 
-    try {
-      final patientImage = await _picker.getImage(
-        source: ImageSource.camera,
-        imageQuality: 50,
-        maxWidth: 150,
-      );
-      setState(() {
-        if (patientImage != null) {
-          _patientImage = File(patientImage.path);
-        }
-      });
-    } catch (e) {
-      print(e.toString());
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('user_image')
+          .child('patient_image')
+          .child(currentPatient.uid + '.jpg');
+
+      await ref.putFile(_patientImage);
+
+      final url = await ref.getDownloadURL();
+
+      await FirebaseFirestore.instance
+          .collection('patients')
+          .doc(currentPatient.uid)
+          .update({'image': url});
     }
   }
 
@@ -146,6 +149,7 @@ class _ProfilescreenState extends State<ProfileScreen> {
         _namePatient = documentSnapshot['username'];
         _birthday = documentSnapshot['birth_day'];
         _gender = documentSnapshot['gender'];
+        _imagePatient = documentSnapshot['image'];
         _phoneNumber = documentSnapshot['phone_number'];
         _height = documentSnapshot['height'];
         _weight = documentSnapshot['weight'];
@@ -299,14 +303,14 @@ class _ProfilescreenState extends State<ProfileScreen> {
                                 padding: EdgeInsets.fromLTRB(0, 2, 0, 10),
                                 width: MediaQuery.of(context).size.width / 2,
                                 height: MediaQuery.of(context).size.width / 2,
-                                decoration: _patientImage != null
+                                decoration: _imagePatient != null
                                     ? BoxDecoration(
                                         border: Border.all(
                                             color: Colors.white, width: 5),
                                         shape: BoxShape.circle,
                                         image: DecorationImage(
                                           fit: BoxFit.cover,
-                                          image: FileImage(_patientImage),
+                                          image: NetworkImage(_imagePatient),
                                         ),
                                       )
                                     : BoxDecoration(
@@ -324,7 +328,9 @@ class _ProfilescreenState extends State<ProfileScreen> {
                                       ),
                               ),
                               TextButton.icon(
-                                onPressed: setImage,
+                                onPressed: () {
+                                  getImagefromcamera();
+                                },
                                 icon: Icon(
                                   Icons.image,
                                   color: Theme.of(context).primaryColor,

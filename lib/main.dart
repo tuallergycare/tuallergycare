@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:responsive_framework/utils/scroll_behavior.dart';
 import 'package:tuallergycare/screens/assess_screen.dart';
 import 'package:tuallergycare/screens/auth_screen.dart';
 import 'package:tuallergycare/screens/doctor/d_adddrug_screen.dart';
@@ -11,6 +13,7 @@ import 'package:tuallergycare/screens/doctor/d_form_screen.dart';
 import 'package:tuallergycare/screens/doctor/d_home_screen.dart';
 import 'package:tuallergycare/screens/doctor/d_patientprofile_screen.dart';
 import 'package:tuallergycare/screens/doctor/d_profile_screen.dart';
+import 'package:tuallergycare/screens/doctor/d_qrcode.dart';
 import 'package:tuallergycare/screens/doctor/d_skintest.dart';
 import 'package:tuallergycare/screens/doctor/d_tabs_screen.dart';
 import 'package:tuallergycare/screens/edit_profile_screen.dart';
@@ -124,6 +127,20 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      builder: (context, widget) => ResponsiveWrapper.builder(
+        BouncingScrollWrapper.builder(context, widget),
+          maxWidth: 1200,
+          minWidth: 450,
+          defaultScale: true,
+          breakpoints: [
+            ResponsiveBreakpoint.autoScale(600),
+            // ResponsiveBreakpoint.resize(450, name: MOBILE),
+            // ResponsiveBreakpoint.autoScale(800, name: TABLET),
+            // ResponsiveBreakpoint.autoScale(1000, name: TABLET),
+            // ResponsiveBreakpoint.resize(1200, name: DESKTOP),
+            // ResponsiveBreakpoint.autoScale(2460, name: "4K"),
+          ]
+      ),
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.green,
@@ -242,6 +259,7 @@ class _MyAppState extends State<MyApp> {
         Diagnose.routeName: (ctx) => Diagnose(),
         Appointment.routeName: (ctx) => Appointment(),
         GraphScreen.routeName: (ctx) => GraphScreen(),
+        Scanner.routeName: (ctx) => Scanner(),
       },
     );
   }
