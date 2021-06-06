@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:tuallergycare/screens/assess_screen.dart';
 import 'package:tuallergycare/screens/information_screen/medicine/medicine_info_screen.dart';
@@ -13,6 +14,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentPatient = FirebaseAuth.instance.currentUser;
@@ -173,16 +179,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                       ),
-                      TextButton(
-                          onPressed: () async {
-                            Navigator.popUntil(
-                                context,
-                                ModalRoute.withName(
-                                    Navigator.defaultRouteName));
-                            await FirebaseAuth.instance.signOut();
-                            print('canpop ${Navigator.canPop(context)}');
-                          },
-                          child: Text('ออกจากระบบ'))
+                      // TextButton(
+                      //     onPressed: () async {
+                      //       Navigator.popUntil(
+                      //           context,
+                      //           ModalRoute.withName(
+                      //               Navigator.defaultRouteName));
+                      //       await FirebaseAuth.instance.signOut();
+                      //       print('canpop ${Navigator.canPop(context)}');
+                      //     },
+                      //     child: Text('ออกจากระบบ'))
                     ],
                   ),
                 );

@@ -27,57 +27,72 @@ class DoctorHomeScreenState extends State<DoctorHomeScreen> {
   void initState() {
     super.initState();
   }
+
   // String qrCode = 'Unknown';
   @override
   Widget build(BuildContext context) {
     print('root');
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: const Text(
-            'หน้าหลัก',
-            textAlign: TextAlign.center,
-          ),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.person_add_alt_rounded),
-              tooltip: 'Scan QR Code',
-              onPressed: (){
-                Navigator.pushNamed(context, Scanner.routeName);
-              },
+    return StreamBuilder<Object>(
+        stream: FirebaseFirestore.instance
+            .collection('doctors')
+            .doc(currentUser.uid)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+          return DefaultTabController(
+            length: 2,
+            child: Scaffold(
+              appBar: AppBar(
+                centerTitle: true,
+                title: const Text(
+                  'หน้าหลัก',
+                  textAlign: TextAlign.center,
+                ),
+                actions: <Widget>[
+                  IconButton(
+                    icon: const Icon(Icons.person_add_alt_rounded),
+                    tooltip: 'Scan QR Code',
+                    onPressed: () {
+                      Navigator.pushNamed(context, Scanner.routeName);
+                    },
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      Navigator.popUntil(context,
+                          ModalRoute.withName(Navigator.defaultRouteName));
+                      await FirebaseAuth.instance.signOut();
+                      print('canpop ${Navigator.canPop(context)}');
+                    },
+                    icon: Icon(Icons.exit_to_app),
+                  )
+                ],
+                bottom: TabBar(
+                  //isScrollable: true,
+                  indicatorColor: Colors.white,
+                  indicatorWeight: 5,
+                  tabs: [
+                    Tab(text: 'รายชื่อผู้ป่วยที่นัดวันนี้'),
+                    Tab(text: 'รายชื่อผู้ป่วยทั้งหมด'),
+                  ],
+                ),
+                elevation: 10,
+                titleSpacing: 10,
+              ),
+              body: TabBarView(
+                children: [
+                  PatientToday(),
+                  PatientAll(),
+                ],
+              ),
             ),
-            IconButton(
-              onPressed: () async {
-                Navigator.popUntil(
-                    context, ModalRoute.withName(Navigator.defaultRouteName));
-                await FirebaseAuth.instance.signOut();
-                print('canpop ${Navigator.canPop(context)}');
-              },
-              icon: Icon(Icons.exit_to_app),
-            )
-          ],
-          bottom: TabBar(
-            //isScrollable: true,
-            indicatorColor: Colors.white,
-            indicatorWeight: 5,
-            tabs: [
-              Tab(text: 'รายชื่อผู้ป่วยที่นัดวันนี้'),
-              Tab(text: 'รายชื่อผู้ป่วยทั้งหมด'),
-            ],
-          ),
-          elevation: 10,
-          titleSpacing: 10,
-        ),
-        body: TabBarView(
-          children: [
-            PatientToday(),
-            PatientAll(),
-          ],
-        ),
-      ),
-    );
+          );
+        });
 
     //    Future<void> scanQRCode() async {
     //   try {
@@ -144,7 +159,7 @@ class _PatientTodayState extends State<PatientToday> {
   List<Patient> _patients = [];
   final currentUser = FirebaseAuth.instance.currentUser;
   DateTime today = DateTime.now();
-
+  DateTime selectedDay;
   @override
   void initState() {
     // TODO: implement initState
@@ -165,8 +180,14 @@ class _PatientTodayState extends State<PatientToday> {
   }
 
   Future<void> getPatient() async {
+    if (_idPatients.length != 0) {
+      _idPatients.clear();
+    }
     if (_patients.length != 0) {
       _patients.clear();
+    }
+    if (selectedDay == null) {
+      selectedDay = today;
     }
     try {
       await FirebaseFirestore.instance
@@ -187,16 +208,16 @@ class _PatientTodayState extends State<PatientToday> {
           //     .data()['create_at']
           //     .microsecondsSinceEpoch);
           // difDate.add(now.difference(recentDate).inDays);
-          print('iiiii: ${_idPatients.elementAt(i)}');
-          print('ddddddd: ${doc.data()['username']}');
+          // print('iiiii: ${_idPatients.elementAt(i)}');
+          // print('ddddddd: ${doc.data()['username']}');
           if (doc.data()['appointment'] != null) {
             var date = DateTime.fromMicrosecondsSinceEpoch(
                 doc.data()['appointment']['day'].microsecondsSinceEpoch);
-            var difdate = today.difference(date).inDays;
+            var difdate = selectedDay.toLocal().difference(date).inDays;
             print('today ${today.day}');
             print('date ${date.day}');
             print(difdate);
-            if (today.day == date.day) {
+            if (selectedDay.day == date.day) {
               print('inPaTodat');
               _patients.add(new Patient(
                 doc.id,
@@ -246,10 +267,18 @@ class _PatientTodayState extends State<PatientToday> {
                       children: <Widget>[
                         //ปฏิทิน
                         TableCalendar(
+                          initialSelectedDay: selectedDay,
                           calendarController: _calendar,
                           initialCalendarFormat: CalendarFormat.week,
                           startingDayOfWeek: StartingDayOfWeek.sunday,
                           formatAnimation: FormatAnimation.slide,
+                          onDaySelected:
+                              (DateTime pickedDay, List d1, List d2) {
+                            setState(() {
+                              selectedDay = pickedDay;
+                              print(selectedDay);
+                            });
+                          },
                           headerStyle: HeaderStyle(
                             centerHeaderTitle: true,
                             formatButtonVisible: false,
@@ -364,7 +393,7 @@ class _PatientTodayState extends State<PatientToday> {
                           borderRadius: BorderRadius.all(Radius.circular(60)),
                           image: DecorationImage(
                             image: img != null
-                                ? AssetImage(img)
+                                ? NetworkImage(img)
                                 : gender == 'ชาย'
                                     ? AssetImage('assets/images/male.png')
                                     : AssetImage('assets/images/female.png'),
@@ -484,6 +513,12 @@ class _PatientAllState extends State<PatientAll> {
   }
 
   Future<void> getPatientAll() async {
+    if (_idPatients.length != 0) {
+      _idPatients.clear();
+    }
+    if (_patientsAll.length != 0) {
+      _patientsAll.clear();
+    }
     try {
       await FirebaseFirestore.instance
           .collection('doctors')
@@ -608,7 +643,8 @@ class _PatientAllState extends State<PatientAll> {
         .pushNamed(PatientProfileScreen.routeName, arguments: id);
   }
 
-  Widget _buildCardAll(String id, String name, String gender, String status, String img) {
+  Widget _buildCardAll(
+      String id, String name, String gender, String status, String img) {
     var statusIcon;
     if (status == 'T0') {
       statusIcon = 'assets/images/status_green.png';
@@ -653,7 +689,7 @@ class _PatientAllState extends State<PatientAll> {
                           borderRadius: BorderRadius.all(Radius.circular(60)),
                           image: DecorationImage(
                             image: img != null
-                                ? AssetImage(img)
+                                ? NetworkImage(img)
                                 : gender == 'ชาย'
                                     ? AssetImage('assets/images/male.png')
                                     : AssetImage('assets/images/female.png'),

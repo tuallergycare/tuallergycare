@@ -46,7 +46,7 @@ class _GraphScreenState extends State<GraphScreen> {
       print('Note Err');
       print(e);
     }
-
+    print('track1');
     try {
       for (var i = 0; i < _medicineNotes.length; i++) {
         await FirebaseFirestore.instance
@@ -80,10 +80,6 @@ class _GraphScreenState extends State<GraphScreen> {
       print('Record Err');
       print(e);
     }
-    print(_medicineNotes.first.name);
-    print(_medicineNotes.first.timeToTake);
-    print(_medicineNotes.first.record.length);
-
     try {
       await FirebaseFirestore.instance
           .collection('patients')
@@ -344,7 +340,7 @@ class _GraphScreenState extends State<GraphScreen> {
 
                             if (isComplete != true) {
                               if (results.contains('complete') ||
-                                  results.contains('incomplete')) {
+                                  results.contains('incompleted')) {
                                 isIncomplete = true;
                               } else {
                                 isNone = true;
@@ -358,11 +354,12 @@ class _GraphScreenState extends State<GraphScreen> {
 
                           //Assessment
 
-                          var vas = 0;
+                          var vas = -1;
 
                           var isZero = false;
                           var isLessThenFive = false;
                           var isMoreThanFive = false;
+                          var isNull = false;
 
                           for (var i = 0; i < _assessmentNotes.length; i++) {
                             if (date
@@ -374,6 +371,8 @@ class _GraphScreenState extends State<GraphScreen> {
                                     0 &&
                                 date.toLocal().day ==
                                     _assessmentNotes.elementAt(i).created.day) {
+                              print(
+                                  'put ${_assessmentNotes.elementAt(i).vasScore}');
                               vas = _assessmentNotes.elementAt(i).vasScore;
                             }
                             // if (date
@@ -384,7 +383,11 @@ class _GraphScreenState extends State<GraphScreen> {
                             //         date.toLocal().day == element.created.day)
                           }
 
-                          print('vas: ${vas}');
+                          // print('vas: ${vas}');
+
+                          if (vas == -1) {
+                            isNull = true;
+                          }
 
                           if (vas == 0) {
                             isZero = true;
@@ -418,11 +421,13 @@ class _GraphScreenState extends State<GraphScreen> {
                                           clipper: TriangleClipper(),
                                           child: Container(
                                             decoration: BoxDecoration(
-                                              color: isMoreThanFive
-                                                  ? Colors.red[300]
-                                                  : isLessThenFive
-                                                      ? Colors.yellow[300]
-                                                      : Colors.white,
+                                              color: isNull
+                                                  ? Colors.grey[350]
+                                                  : isMoreThanFive
+                                                      ? Colors.red[300]
+                                                      : isLessThenFive
+                                                          ? Colors.yellow[300]
+                                                          : Colors.white,
                                             ),
                                             height: 26,
                                             width: 26,
@@ -665,6 +670,34 @@ class _GraphScreenState extends State<GraphScreen> {
                         SizedBox(
                           height: 5,
                         ),
+                        Container(
+                        child: Row(
+                          children: [
+                            ClipPath(
+                              clipper: TriangleClipper(),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[350],
+                                ),
+                                height: 26,
+                                width: 26,
+                                child: CustomPaint(
+                                  painter: ClipperBorderPainter(),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              child: Text(
+                                'ไม่ได้ทำแบบประเมิน',
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                         Container(
                           child: Row(
                             children: [

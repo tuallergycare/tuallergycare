@@ -9,7 +9,7 @@ class Diagnose extends StatefulWidget {
 }
 
 class _DiagnoseState extends State<Diagnose> {
-  String _selectedstatusPatient;
+  // String _selectedstatusPatient;
   String diagnose;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   List<Map> statusPatient = [
@@ -45,77 +45,13 @@ class _DiagnoseState extends State<Diagnose> {
       appBar: AppBar(
         title: const Text('ผลวินิจฉัย'),
       ),
-      body: Container(
+      body: 
+      Container(
         child: Center(
           child: Padding(
             padding: EdgeInsets.all(10),
             child: Column(
               children: <Widget>[
-                Container(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'แก้ไขอาการของผู้ป่วย',
-                    style: TextStyle(fontSize: 18, color: Style().prinaryColor),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(top: 10),
-                  padding: EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                      border: Border.all(width: 1, color: Colors.grey),
-                      borderRadius: BorderRadius.circular(15)),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Expanded(
-                        child: DropdownButtonHideUnderline(
-                          child: ButtonTheme(
-                            alignedDropdown: true,
-                            child: DropdownButton<String>(
-                              isDense: true,
-                              // hint: new Text(
-                              //   "ชื่อยาสำหรับรับประทาน",
-                              //   style: TextStyle(fontSize: 18),
-                              // ),
-                              value: _selectedstatusPatient,
-                              onChanged: (String newValue) {
-                                setState(() {
-                                  _selectedstatusPatient = newValue;
-                                });
-                                print(_selectedstatusPatient);
-                              },
-                              items: statusPatient.map((Map map) {
-                                return new DropdownMenuItem<String>(
-                                  value: map["status"].toString(),
-                                  child: Row(
-                                    children: <Widget>[
-                                      Image.asset(
-                                        map["image"],
-                                        fit: BoxFit.contain,
-                                        width: 30,
-                                        height: 30,
-                                      ),
-                                      Container(
-                                        margin: EdgeInsets.only(left: 10),
-                                        child: Text(
-                                          map["name"],
-                                          style: TextStyle(
-                                            color: Style().darkColor,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
                 Container(
                   margin: EdgeInsets.only(top: 10),
                   alignment: Alignment.centerLeft,
@@ -155,33 +91,9 @@ class _DiagnoseState extends State<Diagnose> {
                     onPressed: () async {
                       _formKey.currentState.save();
 
-                      if (_selectedstatusPatient == null) {
-                        await showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('กรุณากำหนดสถานะ'),
-                            // content: Text('Something went wrong.'),
-                            actions: <Widget>[
-                              TextButton(
-                                child: Text(
-                                  'ตกลง',
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  return;
-                                },
-                              )
-                            ],
-                          ),
-                        );
-                      }
-
                       if (diagnose == null || diagnose == '') {
                         diagnose =
-                            'อาการ${statusPatient.firstWhere((element) => element['status'] == _selectedstatusPatient)['name']}';
+                            '-';
                       }
 
                       print(diagnose);
@@ -190,7 +102,6 @@ class _DiagnoseState extends State<Diagnose> {
                           .collection('patients')
                           .doc(patientId)
                           .update({
-                        'status': _selectedstatusPatient,
                         'research': diagnose
                       });
                       setState(() {});

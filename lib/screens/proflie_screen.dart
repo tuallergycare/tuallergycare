@@ -146,13 +146,18 @@ class _ProfilescreenState extends State<ProfileScreen> {
           .doc(currentPatient.uid)
           .get()
           .then((DocumentSnapshot documentSnapshot) {
+           
         _namePatient = documentSnapshot['username'];
+         
         _birthday = documentSnapshot['birth_day'];
         _gender = documentSnapshot['gender'];
+    print('hoooo');
         _imagePatient = documentSnapshot['image'];
+        print('hiiiii');
         _phoneNumber = documentSnapshot['phone_number'];
         _height = documentSnapshot['height'];
         _weight = documentSnapshot['weight'];
+        
         _disease = documentSnapshot['disease'];
         if (documentSnapshot['skintest'] != null) {
           _skintest = documentSnapshot['skintest'];
@@ -161,7 +166,10 @@ class _ProfilescreenState extends State<ProfileScreen> {
         }
         _research = documentSnapshot['research'];
         _appointment = documentSnapshot['appointment'];
+
+        
       });
+
 
       await FirebaseFirestore.instance
           .collection('patients')
@@ -176,12 +184,14 @@ class _ProfilescreenState extends State<ProfileScreen> {
           try {
             _medicine.add(querySnapshot.docs.elementAt(i)['name_medicine']);
           } catch (e) {
+            print('small');
             print(e);
           }
           print('Hello');
         }
       });
     } catch (e) {
+      print('Big');
       print(e);
     }
   }
@@ -251,7 +261,7 @@ class _ProfilescreenState extends State<ProfileScreen> {
               future: loadDataPatient(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
+                  return Center(child: CircularProgressIndicator());
                 }
                 return Scaffold(
                   appBar: AppBar(

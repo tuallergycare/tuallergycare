@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tuallergycare/screens/doctor/d_drugspay.dart';
 import 'package:tuallergycare/screens/medicine_screen.dart';
@@ -44,6 +45,7 @@ class AddDrugScreen extends StatefulWidget {
 }
 
 class _AddDrugScreenState extends State<AddDrugScreen> {
+  final currentDoctor = FirebaseAuth.instance.currentUser;
   List _medicine = [];
   String patientId;
 
@@ -305,20 +307,101 @@ class _AddDrugScreenState extends State<AddDrugScreen> {
                                                       color: Colors.white),
                                                 ),
                                                 color: Colors.grey,
-                                                onPressed: () {},
+                                                onPressed: () async {
+                                                  var dataId;
+                                                  await FirebaseFirestore
+                                                      .instance
+                                                      .collection('patients')
+                                                      .doc(patientId)
+                                                      .collection('medicines')
+                                                      .get()
+                                                      .then((QuerySnapshot
+                                                          querySnapshot) {
+                                                    dataId = querySnapshot.docs
+                                                        .firstWhere((value) =>
+                                                            value.data()[
+                                                                'name_medicine'] ==
+                                                            element
+                                                                .nameMedicine)
+                                                        .id;
+                                                  });
+                                                  print(dataId);
+
+                                                  var checkMedTime;
+                                                  var idMedTime = [];
+
+                                                  try {
+                                                    await FirebaseFirestore
+                                                        .instance
+                                                        .collection('patients')
+                                                        .doc(patientId)
+                                                        .collection('medicines')
+                                                        .doc(dataId)
+                                                        .collection(
+                                                            'medicine_time')
+                                                        .get()
+                                                        .then((QuerySnapshot
+                                                            querySnapshot) {
+                                                      checkMedTime =
+                                                          querySnapshot.size;
+                                                      if (checkMedTime != 0) {
+                                                        querySnapshot.docs
+                                                            .forEach((element) {
+                                                          idMedTime
+                                                              .add(element.id);
+                                                        });
+                                                      }
+                                                    });
+
+                                                    print(
+                                                        'checkMedTime $checkMedTime');
+
+                                                    if (checkMedTime != 0) {
+                                                      for (var i = 0;
+                                                          i < idMedTime.length;
+                                                          i++) {
+                                                        await FirebaseFirestore
+                                                            .instance
+                                                            .collection(
+                                                                'patients')
+                                                            .doc(patientId)
+                                                            .collection(
+                                                                'medicines')
+                                                            .doc(dataId)
+                                                            .collection(
+                                                                'medicine_time')
+                                                            .doc(idMedTime
+                                                                .elementAt(i))
+                                                            .delete();
+                                                      }
+                                                      
+                                                    }
+
+                                                    idMedTime.clear();
+                                                    checkMedTime = 0;
+                                                  } catch (e) {}
+
+                                                  await FirebaseFirestore
+                                                      .instance
+                                                      .collection('patients')
+                                                      .doc(patientId)
+                                                      .collection('medicines')
+                                                      .doc(dataId)
+                                                      .delete();
+                                                },
                                               ),
                                               SizedBox(
                                                 width: 20,
                                               ),
-                                              RaisedButton(
-                                                child: Text(
-                                                  'แก้ไข',
-                                                  style: TextStyle(
-                                                      color: Colors.white),
-                                                ),
-                                                color: Colors.grey,
-                                                onPressed: () {},
-                                              ),
+                                              // RaisedButton(
+                                              //   child: Text(
+                                              //     'แก้ไข',
+                                              //     style: TextStyle(
+                                              //         color: Colors.white),
+                                              //   ),
+                                              //   color: Colors.grey,
+                                              //   onPressed: () {},
+                                              // ),
                                             ],
                                           ),
                                         ),

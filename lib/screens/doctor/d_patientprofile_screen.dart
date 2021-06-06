@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expandable/expandable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,8 +13,10 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:tuallergycare/screens/doctor/d_adddrug_screen.dart';
 import 'package:tuallergycare/screens/doctor/d_appointment.dart';
 import 'package:tuallergycare/screens/doctor/d_diagnose.dart';
+import 'package:tuallergycare/screens/doctor/d_disease.dart';
 import 'package:tuallergycare/screens/doctor/d_home_screen.dart';
 import 'package:tuallergycare/screens/doctor/d_skintest.dart';
+import 'package:tuallergycare/screens/doctor/d_status_screen.dart';
 import 'package:tuallergycare/utility/style.dart';
 import 'package:tuallergycare/widgets/assess_warning.dart';
 
@@ -71,7 +74,7 @@ class PatientInfo extends StatefulWidget {
 class _PatientInfoState extends State<PatientInfo> {
   String patientId;
   _PatientInfoState(this.patientId);
-
+  final currentDoctor = FirebaseAuth.instance.currentUser;
   File _patientImage;
   String _namePatient;
   String _birthday;
@@ -80,6 +83,7 @@ class _PatientInfoState extends State<PatientInfo> {
   String _gender;
   String _imagePatient;
   String _phoneNumber;
+  String _status;
   String _disease;
   List<dynamic> _medicine = <String>[];
   List<dynamic> _skintest = <dynamic>[];
@@ -280,6 +284,7 @@ class _PatientInfoState extends State<PatientInfo> {
                   // selectedSkintestList.forEach((element) {
                   //   print(element);
                   // });
+
                   await FirebaseFirestore.instance
                       .collection('patients')
                       .doc(patientId)
@@ -448,6 +453,73 @@ class _PatientInfoState extends State<PatientInfo> {
     );
   }
 
+  //แก้ไขสถานะผู้ป่วย
+  Widget buildInfoPatientEditStatus() {
+    return Container(
+      alignment: Alignment.centerLeft,
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Container(
+              child: Text(
+                'สถานะ',
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 7,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: _status != null
+                    ? Text(
+                        _status,
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 18,
+                        ),
+                      )
+                    : Text(
+                        'เพิ่มข้อมูล',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 20,
+                        ),
+                      ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: IconButton(
+              icon: const Icon(
+                Icons.edit,
+                size: 18,
+                color: Colors.grey,
+              ),
+              onPressed: () => Navigator.of(context).pushNamed(
+                StatusScreen.routeName,
+                arguments: patientId,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 //แก้ไขผลวินิจฉัย
   Widget buildInfoPatientEditReseach() {
     return Container(
@@ -515,6 +587,73 @@ class _PatientInfoState extends State<PatientInfo> {
     );
   }
 
+  //แก้ไขข้อมูลโรค
+  Widget buildInfoPatientEditDisease() {
+    return Container(
+      alignment: Alignment.centerLeft,
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Container(
+              child: Text(
+                'โรค',
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 7,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: _disease != null
+                    ? Text(
+                        _disease,
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 18,
+                        ),
+                      )
+                    : Text(
+                        'เพิ่มข้อมูล',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 20,
+                        ),
+                      ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: IconButton(
+              icon: const Icon(
+                Icons.edit,
+                size: 18,
+                color: Colors.grey,
+              ),
+              onPressed: () => Navigator.of(context).pushNamed(
+                Disease.routeName,
+                arguments: patientId,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> loadDataPatient() async {
     try {
       await FirebaseFirestore.instance
@@ -529,6 +668,7 @@ class _PatientInfoState extends State<PatientInfo> {
         _height = documentSnapshot['height'];
         _weight = documentSnapshot['weight'];
         _imagePatient = documentSnapshot['image'];
+        _status = documentSnapshot['status'];
         _disease = documentSnapshot['disease'];
         if (documentSnapshot['skintest'] != null) {
           _skintest = documentSnapshot['skintest'];
@@ -643,18 +783,105 @@ class _PatientInfoState extends State<PatientInfo> {
                                             'เบอร์โทรศัพท์', _phoneNumber),
                                         buildInfoPatient('น้ำหนัก', _weight),
                                         buildInfoPatient('ส่วนสูง', _height),
-                                        buildInfoPatient('โรค', _disease),
+                                        buildInfoPatientEditStatus(),
+                                        buildInfoPatientEditDisease(),
                                         buildInfoPatientEditDrug(),
                                         buildInfoPatientEditSkintest(),
                                         buildInfoPatientEditReseach(),
                                         buildInfoPatientEditAppointment(),
-                                        // buildInfoPatientEdit(
-                                        //   'ยา',
-                                        //   _medicine,
-                                        // ),
-                                        // buildInfoPatientEdit('skintest', _skintest),
-                                        // buildInfoPatientEdit('ผลวินิจฉัย', _research),
-                                        // buildInfoPatientEdit('ตารางนัด', _appointment)
+                                        SizedBox(
+                                          height: 20,
+                                        ),
+                                        Container(
+                                          child: ElevatedButton(
+                                            style: ButtonStyle(
+                                              backgroundColor:
+                                                  MaterialStateProperty.all<
+                                                      Color>(Colors.red),
+                                            ),
+                                            onPressed: () {
+                                              showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  // print('เพิ่มผู้ป่วย');
+                                                  return AlertDialog(
+                                                    title: Text(
+                                                        'ต้องการลบผู้ป่วย?'),
+                                                    actions: <Widget>[
+                                                      TextButton(
+                                                        child: Text(
+                                                          'ยืนยัน',
+                                                          style: TextStyle(
+                                                            fontSize: 18,
+                                                            color: Colors.black,
+                                                          ),
+                                                        ),
+                                                        onPressed: () async {
+                                                          var _idPatients = [];
+                                                          await FirebaseFirestore
+                                                              .instance
+                                                              .collection(
+                                                                  'doctors')
+                                                              .doc(currentDoctor
+                                                                  .uid)
+                                                              .get()
+                                                              .then((doc) {
+                                                            _idPatients =
+                                                                doc.data()[
+                                                                    'patients'];
+                                                          });
+
+                                                          _idPatients.remove(
+                                                              patientId);
+
+                                                          await FirebaseFirestore
+                                                              .instance
+                                                              .collection(
+                                                                  'doctors')
+                                                              .doc(currentDoctor
+                                                                  .uid)
+                                                              .update({
+                                                            'patients':
+                                                                _idPatients
+                                                          });
+
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                      ),
+                                                      TextButton(
+                                                        child: Text(
+                                                          'ยกเลิก',
+                                                          style: TextStyle(
+                                                            fontSize: 18,
+                                                            color: Colors.black,
+                                                          ),
+                                                        ),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                          // Navigator.of(context)
+                                                          //     .pop();
+                                                          // print(scanData.code);
+                                                        },
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                            },
+                                            child: Text(
+                                              'ลบผู้ป่วย',
+                                              style: TextStyle(fontSize: 20),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 20,
+                                        )
                                       ],
                                     ),
                                   ),
@@ -1174,10 +1401,12 @@ class _PatientGraphState extends State<PatientGraph> {
           (element) {
             _medicineNotes.add(
               new MedicineNote(
-                  element.id,
-                  element.data()['name_medicine'],
-                  element.data()['type_medicine'],
-                  element.data()['time_to_take'], []),
+                element.id,
+                element.data()['name_medicine'],
+                element.data()['type_medicine'],
+                element.data()['time_to_take'],
+                [],
+              ),
             );
           },
         );
@@ -1478,7 +1707,7 @@ class _PatientGraphState extends State<PatientGraph> {
 
                           if (isComplete != true) {
                             if (results.contains('complete') ||
-                                results.contains('incomplete')) {
+                                results.contains('incompleted')) {
                               isIncomplete = true;
                             } else {
                               isNone = true;
@@ -1492,11 +1721,12 @@ class _PatientGraphState extends State<PatientGraph> {
 
                         //Assessment
 
-                        var vas = 0;
+                        var vas = -1;
 
                         var isZero = false;
                         var isLessThenFive = false;
                         var isMoreThanFive = false;
+                        var isNull = false;
 
                         for (var i = 0; i < _assessmentNotes.length; i++) {
                           if (date
@@ -1517,7 +1747,10 @@ class _PatientGraphState extends State<PatientGraph> {
                           //         date.toLocal().day == element.created.day)
                         }
 
-                        print('vas: ${vas}');
+                        // print('vas: ${vas}');
+                        if (vas == -1) {
+                          isNull = true;
+                        }
 
                         if (vas == 0) {
                           isZero = true;
@@ -1551,11 +1784,13 @@ class _PatientGraphState extends State<PatientGraph> {
                                         clipper: TriangleClipper(),
                                         child: Container(
                                           decoration: BoxDecoration(
-                                            color: isMoreThanFive
-                                                ? Colors.red[300]
-                                                : isLessThenFive
-                                                    ? Colors.yellow[300]
-                                                    : Colors.white,
+                                            color: isNull
+                                                ? Colors.grey[350]
+                                                : isMoreThanFive
+                                                    ? Colors.red[300]
+                                                    : isLessThenFive
+                                                        ? Colors.yellow[300]
+                                                        : Colors.white,
                                           ),
                                           height: 26,
                                           width: 26,
@@ -1797,6 +2032,34 @@ class _PatientGraphState extends State<PatientGraph> {
                       ),
                       SizedBox(
                         height: 5,
+                      ),
+                      Container(
+                        child: Row(
+                          children: [
+                            ClipPath(
+                              clipper: TriangleClipper(),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[350],
+                                ),
+                                height: 26,
+                                width: 26,
+                                child: CustomPaint(
+                                  painter: ClipperBorderPainter(),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              child: Text(
+                                'ไม่ได้ทำแบบประเมิน',
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       Container(
                         child: Row(

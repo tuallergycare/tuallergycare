@@ -176,6 +176,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               'birth_day': _birthday,
                               'gender': _gender,
                               'phone_number': _phoneNumber,
+                              'image': null,
                               'status': null,
                               'isFirstLogin': true,
                               'height': null,

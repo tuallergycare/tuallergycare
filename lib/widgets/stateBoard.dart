@@ -182,10 +182,34 @@ class _StateBoardState extends State<StateBoard> {
           defindStatus(hasCongrestionNasal, avgVasScore);
         });
 
+        // if(presentStatusPatient == 'T0'){
+        //   await FirebaseFirestore.instance
+        //     .collection('patients')
+        //     .doc(currentPatient.uid)
+        //     .update({'status': presentStatusPatient, 'research': 'อาการน้อย'});
+        // } else if(presentStatusPatient == 'T1'){
+        //   await FirebaseFirestore.instance
+        //     .collection('patients')
+        //     .doc(currentPatient.uid)
+        //     .update({'status': presentStatusPatient, 'research': 'อาการปานกลาง'});
+        // } else if(presentStatusPatient == 'T2'){
+        //   await FirebaseFirestore.instance
+        //     .collection('patients')
+        //     .doc(currentPatient.uid)
+        //     .update({'status': presentStatusPatient, 'research': 'อาการค่อนข้างรุนแรง'});
+        // } else if(presentStatusPatient == 'T3'){
+        //   await FirebaseFirestore.instance
+        //     .collection('patients')
+        //     .doc(currentPatient.uid)
+        //     .update({'status': presentStatusPatient, 'research': 'อาการรุนแรงที่สุด'});
+        // }
+
         await FirebaseFirestore.instance
             .collection('patients')
             .doc(currentPatient.uid)
             .update({'status': presentStatusPatient});
+
+
       }
     } catch (e) {
       print('Error Assess Call');

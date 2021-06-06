@@ -1,4 +1,6 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 import 'package:responsive_framework/utils/scroll_behavior.dart';
 import 'package:tuallergycare/screens/assess_screen.dart';
@@ -6,6 +8,7 @@ import 'package:tuallergycare/screens/auth_screen.dart';
 import 'package:tuallergycare/screens/doctor/d_adddrug_screen.dart';
 import 'package:tuallergycare/screens/doctor/d_appointment.dart';
 import 'package:tuallergycare/screens/doctor/d_diagnose.dart';
+import 'package:tuallergycare/screens/doctor/d_disease.dart';
 import 'package:tuallergycare/screens/doctor/d_drugoral.dart';
 import 'package:tuallergycare/screens/doctor/d_drugspay.dart';
 import 'package:tuallergycare/screens/doctor/d_editprofilescreen.dart';
@@ -15,6 +18,7 @@ import 'package:tuallergycare/screens/doctor/d_patientprofile_screen.dart';
 import 'package:tuallergycare/screens/doctor/d_profile_screen.dart';
 import 'package:tuallergycare/screens/doctor/d_qrcode.dart';
 import 'package:tuallergycare/screens/doctor/d_skintest.dart';
+import 'package:tuallergycare/screens/doctor/d_status_screen.dart';
 import 'package:tuallergycare/screens/doctor/d_tabs_screen.dart';
 import 'package:tuallergycare/screens/edit_profile_screen.dart';
 import 'package:tuallergycare/screens/first_assess_screen.dart';
@@ -31,10 +35,56 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+  await Firebase.initializeApp();
+  print('Handling a background message ${message.messageId}');
+}
+
+/// Create a [AndroidNotificationChannel] for heads up notifications
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'high_importance_channel', // id
+  'High Importance Notifications', // title
+  'This channel is used for important notifications.', // description
+  importance: Importance.high,
+);
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    print('User granted permission: ${settings.authorizationStatus}');
   } catch (err) {
     print(err);
   }
@@ -55,6 +105,29 @@ class _MyAppState extends State<MyApp> {
 
   void initState() {
     super.initState();
+
+    FirebaseMessaging.instance.getInitialMessage();
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification notification = message.notification;
+      AndroidNotification android = message.notification?.android;
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channel.description,
+                // TODO add a proper drawable resource to android, for now using
+                //      one that already exists in example app.
+                icon: 'launch_background',
+              ),
+            ));
+      }
+    });
   }
 
   Future<void> checkFirstLogin(User currentUser) async {
@@ -128,7 +201,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       builder: (context, widget) => ResponsiveWrapper.builder(
-        BouncingScrollWrapper.builder(context, widget),
+          BouncingScrollWrapper.builder(context, widget),
           maxWidth: 1200,
           minWidth: 450,
           defaultScale: true,
@@ -139,8 +212,7 @@ class _MyAppState extends State<MyApp> {
             // ResponsiveBreakpoint.autoScale(1000, name: TABLET),
             // ResponsiveBreakpoint.resize(1200, name: DESKTOP),
             // ResponsiveBreakpoint.autoScale(2460, name: "4K"),
-          ]
-      ),
+          ]),
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.green,
@@ -260,6 +332,8 @@ class _MyAppState extends State<MyApp> {
         Appointment.routeName: (ctx) => Appointment(),
         GraphScreen.routeName: (ctx) => GraphScreen(),
         Scanner.routeName: (ctx) => Scanner(),
+        Disease.routeName: (ctx) => Disease(),
+        StatusScreen.routeName: (ctx) => StatusScreen(),
       },
     );
   }

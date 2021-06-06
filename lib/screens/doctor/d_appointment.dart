@@ -59,30 +59,18 @@ class _AppointmentState extends State<Appointment> {
               height: 258,
               imageUrl: 'assets/images/head.png',
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   SizedBox(
                     height: 70,
                   ),
                   Text(
-                    'รายละเอียด',
+                    'นัดหมายช่วงเวลา',
                     style: TextStyle(
                       color: Style().darkColor,
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  Text(
-                    'สมจิต ใจดี',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  Text(
-                    'คลินิกโรคภูมิแพ้',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  Text(
-                    'ตึกA ชั้น2',
-                    style: TextStyle(fontSize: 18),
                   ),
                 ],
               ),
@@ -134,12 +122,15 @@ class _AppointmentState extends State<Appointment> {
                     ),
                     Container(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        'กรุณาเลือกช่วงเวลาที่ว่าง',
-                        style: TextStyle(
-                          color: Style().darkColor,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'กรุณาเลือกช่วงเวลาที่ว่าง',
+                          style: TextStyle(
+                            color: Style().darkColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
